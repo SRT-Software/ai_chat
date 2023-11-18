@@ -26,10 +26,10 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
 def check_token():
     # 获取请求头中的 token
     print(request.headers)
-    token = request.headers.get('Token')
+    token = request.headers.get('Authorization')
     print(token)
     # 校验 token
-    if token != 'test':
+    if token != 'Bearer test':
         abort(401)  # 返回 401 Unauthorized 错误
 
 

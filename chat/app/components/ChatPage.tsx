@@ -44,8 +44,7 @@ const Chat: React.FC = () => {
             axios.post(`${BASEURL}/api/data`, newData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer your_token',
-                    'Token': 'test'
+                    'Authorization': 'Bearer test',
                 }
             })
                 .then((response: AxiosResponse) => {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speech Input</title>
+</head>
+<body>
+    <button id="start-button">Start Speech Input</button>
+    <p id="result"></p>
+
+    <script>
+        var startButton = document.getElementById("start-button");
+        var resultElement = document.getElementById("result");
+
+
+        function startSpeechInput() {
+            var recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'zh';
+            recognition.onresult = function(event) {
+                var result = event.results[event.results.length - 1][0].transcript;
+                console.log("result:")
+                console.log(result)
+                resultElement.textContent = result;
+            };
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                var result = event.results[event.results.length - 1][0].transcript;
+                resultElement.textContent = result;
+            };
+        }
+
+        startButton.addEventListener("click", startSpeechInput);
+
+        function getParameterValue(parameterName) {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(parameterName);
+        }
+
+        var parameterValue = getParameterValue('resultElement');
+    </script>
+</body>
+</html>

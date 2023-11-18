@@ -33,20 +33,21 @@ def chatbot():
         top_p=0.7,
         incremental=True
     )
-    text= globals()["text_list"]
-    source = globals()["source_list"]
 
     def generate():
         for event in sse_data.events():
-            # 构造 SSE 格式的字符串，包含事件名称和ID
-            sse_event = f"data: {event.data}\n"
-            sse_event += f"text_list: {text}\n"
-            sse_event += f"source_list: {source}\n"
-            sse_event += "\n"
-
-            yield sse_event
+            yield f"data: {event.data}\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
+
+
+@app.route('/api/source', methods=['GET'])
+def get_sources():
+    response = {
+        'texts': globals()['text_list'],
+        'sources': globals()['source_list'],
+    }
+    return jsonify(response)
 
 
 def relative_ques(ques):

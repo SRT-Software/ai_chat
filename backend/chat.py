@@ -37,6 +37,7 @@ def chatbot():
     if request.method == 'OPTIONS':
         # 处理预检请求
         headers = request.headers
+        print(headers)
         if 'Token' in headers and headers['Token'] == 'test':
             # 身份验证通过
             return app.make_default_options_response()

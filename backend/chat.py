@@ -37,7 +37,7 @@ def chatbot():
     source = globals()["source_list"]
 
     def generate():
-        for event in sse_data:
+        for event in sse_data.events():
             # 构造 SSE 格式的字符串，包含事件名称和ID
             sse_event = f"data: {event.data}\n"
             sse_event += f"text_list: {text}\n"

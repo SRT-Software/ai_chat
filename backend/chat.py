@@ -27,7 +27,7 @@ def check_token():
     # 获取请求头中的 token
     print(request.headers)
     token = request.headers.get('Token')
-
+    print(token)
     # 校验 token
     if token != 'test':
         abort(401)  # 返回 401 Unauthorized 错误

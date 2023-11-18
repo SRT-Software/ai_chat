@@ -1,7 +1,7 @@
 import zhipuai
 from query import match_query
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__)
 
@@ -24,7 +24,7 @@ def chatbot():
     data = request.json
     ques = data.get('question')
     globals()["text_list"], globals()["source_list"] = match_query(ques, database="milvus")
-    response = zhipuai.model_api.sse_invoke(
+    sse_data = zhipuai.model_api.sse_invoke(
         model="chatglm_pro",
         prompt=[
             {"role": "user", "content": QA_TEMPLATE.format(text_list, ques)},
@@ -33,16 +33,20 @@ def chatbot():
         top_p=0.7,
         incremental=True
     )
-    return response
+    text= globals()["text_list"]
+    source = globals()["source_list"]
 
+    def generate():
+        for event in sse_data:
+            # 构造 SSE 格式的字符串，包含事件名称和ID
+            sse_event = f"data: {event.data}\n"
+            sse_event += f"text_list: {text}\n"
+            sse_event += f"source_list: {source}\n"
+            sse_event += "\n"
 
-@app.route('/api/sources', methods=['GET'])
-def get_sources():
-    response = {
-        "text_list": globals()["text_list"],
-        "source_list": globals()["source_list"]
-    }
-    return jsonify(response)
+            yield sse_event
+
+    return Response(generate(), mimetype='text/event-stream')
 
 
 def relative_ques(ques):

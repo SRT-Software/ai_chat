@@ -1,36 +1,61 @@
-import React, { useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Box from "@mui/material/Box";
 import ChatCard from "@/app/components/ChatCard";
 
-interface ChatProps {
-    // 可选的属性
-    title?: string;
-}
+import ChatMessage from "@/app/classes/ChatMessage";
+import InputBar from "@/app/components/InputBar";
+import {ChatContext, ChatProvider} from "@/app/context/chatContext";
+import axios, {AxiosResponse} from "axios";
+import {BASEURL} from "@/app/config/configs";
 
-const Chat: React.FC<ChatProps> = ({ title }) => {
+
+const Chat: React.FC = () => {
     const [message, setMessage] = useState('');
-    const [chatHistory, setChatHistory] = useState<string[]>([]);
+    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+    const {chatInfo, setChatInfo} = useContext(ChatContext)
 
-    const handleSendMessage = () => {
-        // 发送消息的逻辑
-        if (message.trim() !== '') {
-            setChatHistory([...chatHistory, message]);
-            setMessage('');
+    const chat_messages = chatHistory.map((Message, index) => {
+        return (
+            <ChatCard key={index} role={Message.role} content={Message.messages}/>
+        )
+    })
+
+    useEffect(() => {
+        if (chatInfo.Message !== ''){
+            let newMessage = new ChatMessage('', chatInfo.Message, 'you')
+            setChatHistory(chatHistory => [...chatHistory, newMessage])
+            setChatInfo({
+                ...chatInfo,
+                Message: '',
+            })
+            const headers = { 'Token': 'test' };
+            const data = { question: chatInfo.Message };
+            axios.post(`${BASEURL}/api/data`, data, { headers })
+                .then((response: AxiosResponse) => {
+                    console.log('Response:', response.data);
+                })
+                .catch((error: any) => {
+                    console.error('Error:', error);
+                });
         }
-    };
+    }, [chatInfo.Message]);
 
     return (
         <>
             <Box sx={{
-                height: '100%',
-                width: '100%',
+                height: '500px',
+                width: '600px',
                 overflow: 'auto',
                 border: '1px solid #ccc',
                 borderRadius: '4px',
                 padding: '10px',
+                display: 'block',
+                marginLeft: '25%',
+                marginTop: '2%',
             }}>
-                <ChatCard/>
+                {chat_messages}
             </Box>
+            <InputBar/>
         </>
     );
 };

@@ -6,28 +6,46 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
 import {Avatar} from "@mui/material";
+import {width} from "@mui/system";
+import {useState} from "react";
 
-function ChatCard() {
+interface ChatProps {
+    // 可选的属性
+    role: string,
+    content: string,
+}
+
+function ChatCard(props: ChatProps) {
     const theme = useTheme();
-
+    const [roleText, setRoleText] = useState(props.role === 'assistant' ? "AI助手": "您")
+    const [content, setContent] = useState(props.content)
     return (
-        <Card sx={{
-            display: 'flex' ,
-            width: '40%',
-        }}>
-            <Avatar/>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flex: '1 0 auto' }}>
-                    <Typography component="div" variant="body1">
-                        Live From Space
-                    </Typography>
-                </CardContent>
+        <>
+            <Box sx={{
+                display: 'flex' ,
+                height: 'auto',
+            }}>
+                <Avatar sx={{width: "20px", height: "20px"}}/>
+                <Typography component="div" variant="body2" sx={{marginLeft: "1%"}}>
+                    {roleText}
+                </Typography>
             </Box>
-        </Card>
+            <Box>
+                <Card sx={{
+                    display: 'flex' ,
+                    height: 'auto',
+                }}>
+                    <Box >
+                        <CardContent sx={{ flex: '1' }}>
+                            <Typography component="div" variant="body1">
+                                {content}
+                            </Typography>
+                        </CardContent>
+                    </Box>
+                </Card>
+            </Box>
+        </>
     );
 }
 

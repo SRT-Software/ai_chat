@@ -2,10 +2,11 @@ import zhipuai
 from query import match_query
 import json
 from flask import Flask, request, jsonify, Response, abort
-
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app, origins='*')
 
 text_list = []
 source_list = []

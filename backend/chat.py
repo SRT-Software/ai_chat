@@ -30,7 +30,14 @@ def chatbot():
         top_p=0.7,
         incremental=True
     )
-    return response, source_list, text_list
+    response = {
+        'data': response,
+        'source_list': source_list,
+        'text_list': text_list,
+    }
+    json_data = json.dumps(response)
+
+    return json_data
 
 
 def relative_ques(ques):

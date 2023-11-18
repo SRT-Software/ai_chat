@@ -25,6 +25,7 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
 @app.before_request
 def check_token():
     # 获取请求头中的 token
+    print(request.headers)
     token = request.headers.get('Token')
 
     # 校验 token

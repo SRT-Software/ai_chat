@@ -31,7 +31,7 @@ def chatbot():
         incremental=True
     )
     response = {
-        'data': response,
+        'data': response.data,
         'source_list': source_list,
         'text_list': text_list,
     }

@@ -34,20 +34,23 @@ const Chat: React.FC = () => {
                 ...chatInfo,
                 Message: '',
             })
-            const headers = { 'Token': 'test' };
             const data = { question: chatInfo.Message };
             let newData: PostData = {
                 question: chatInfo.Message
             }
-            let newHeader: PostHeaders = {
-                Token: 'test'
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer token',
+                'Token': 'test'
             }
-            axios.post(`${BASEURL}/api/data`, newData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token': 'test',
-                }
+            axios({
+                method: 'post',
+                url: `${BASEURL}/api/data`,
+                headers: headers
             })
+            axios.post(`${BASEURL}/api/data`, newData,{
+                headers: headers
+            } )
                 .then((response: AxiosResponse) => {
                     console.log('Response:', response.data);
                 })

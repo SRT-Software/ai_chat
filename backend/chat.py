@@ -25,19 +25,24 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
 @app.before_request
 def check_token():
     # 获取请求头中的 token
+    print(request.headers)
     token = request.headers.get('Access-Control-Request-Headers')
     print(token)
-    headers = token.split(',')
-    print(headers)
+    if token != None:
+        headers = token.split(',')
+        if "authorization" not in headers:
+            abort(401)  # 返回 401 Unauthorized 错误
+    else:
+        token = request.headers.get('Authorization')
+        if token != 'Bearer test':
+            abort(401)  # 返回 401 Unauthorized 错误
     # 校验 token
-    if "authorization" not in headers :
-        abort(401)  # 返回 401 Unauthorized 错误
+
 
 
 @app.route('/api/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     if request.method == 'OPTIONS':
-        print(request.headers)
         return app.make_default_options_response()
     else:
         data = request.json

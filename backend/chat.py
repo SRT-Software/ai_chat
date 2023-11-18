@@ -1,7 +1,7 @@
 import zhipuai
 from query import match_query
 import json
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, abort
 
 app = Flask(__name__)
 
@@ -17,6 +17,16 @@ QA_TEMPLATE = 'You are a helpful AI assistant. Use the following pieces of conte
 
 QUES_TEMPLATE = 'make 1 relative question about {}' \
                 'you must give me the question instead of solution'
+
+
+@app.before_request
+def check_token():
+    # 获取请求头中的 token
+    token = request.headers.get('Token')
+
+    # 校验 token
+    if token != 'test':
+        abort(401)  # 返回 401 Unauthorized 错误
 
 
 @app.route('/api/data', methods=['POST'])

@@ -7,7 +7,13 @@ import InputBar from "@/app/components/InputBar";
 import {ChatContext, ChatProvider} from "@/app/context/chatContext";
 import axios, {AxiosResponse} from "axios";
 import {BASEURL} from "@/app/config/configs";
+interface PostData {
+    question: string
+}
 
+interface PostHeaders{
+    Token: string
+}
 
 const Chat: React.FC = () => {
     const [message, setMessage] = useState('');
@@ -30,13 +36,16 @@ const Chat: React.FC = () => {
             })
             const headers = { 'Token': 'test' };
             const data = { question: chatInfo.Message };
-            axios.post(`${BASEURL}/api/data`, {
+            let newData: PostData = {
+                question: chatInfo.Message
+            }
+            let newHeader: PostHeaders = {
+                Token: 'test'
+            }
+            axios.post(`${BASEURL}/api/data`, newData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    Token: 'test'
-                },
-                data: {
-                    "question": chatInfo.Message
+                    'Token': 'test',
                 }
             })
                 .then((response: AxiosResponse) => {

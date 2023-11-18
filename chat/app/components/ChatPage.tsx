@@ -30,7 +30,15 @@ const Chat: React.FC = () => {
             })
             const headers = { 'Token': 'test' };
             const data = { question: chatInfo.Message };
-            axios.post(`${BASEURL}/api/data`, data, { headers })
+            axios.post(`${BASEURL}/api/data`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Token: 'test'
+                },
+                data: {
+                    "question": chatInfo.Message
+                }
+            })
                 .then((response: AxiosResponse) => {
                     console.log('Response:', response.data);
                 })

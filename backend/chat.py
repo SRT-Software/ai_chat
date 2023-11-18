@@ -3,6 +3,8 @@ from query import match_query
 import json
 from flask import Flask, request, jsonify, Response, abort
 
+
+
 app = Flask(__name__)
 
 text_list = []
@@ -78,4 +80,4 @@ def relative_ques(ques):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=0)
+    app.run(host='0.0.0.0', port=5000)

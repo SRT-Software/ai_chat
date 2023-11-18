@@ -6,7 +6,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, origins='*')
+CORS(app, origins='*', resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 text_list = []
 source_list = []

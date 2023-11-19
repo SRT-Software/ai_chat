@@ -46,22 +46,25 @@ def chatbot():
         data = request.json
         print(data)
         ques = data.get('question')
-        globals()["text_list"], globals()["source_list"] = match_query(ques, database="milvus")
-        sse_data = zhipuai.model_api.sse_invoke(
-            model="chatglm_pro",
-            prompt=[
-                {"role": "user", "content": QA_TEMPLATE.format(text_list, ques)},
-            ],
-            temperature=0.95,
-            top_p=0.7,
-            incremental=True
-        )
+        if ques is not None:
+            globals()["text_list"], globals()["source_list"] = match_query(ques, database="milvus")
+            sse_data = zhipuai.model_api.sse_invoke(
+                model="chatglm_pro",
+                prompt=[
+                    {"role": "user", "content": QA_TEMPLATE.format(text_list, ques)},
+                ],
+                temperature=0.95,
+                top_p=0.7,
+                incremental=True
+            )
 
-        def generate():
-            for event in sse_data.events():
-                yield f"data: {event.data}\n\n"
+            def generate():
+                for event in sse_data.events():
+                    yield f"data: {event.data}\n\n"
 
-        return Response(generate(), mimetype='text/event-stream')
+            return Response(generate(), mimetype='text/event-stream')
+        else:
+            return Response("your question is NONE", mimetype='text/event-stream')
 
 
 @app.route('/api/source', methods=['GET'])

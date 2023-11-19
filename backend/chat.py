@@ -46,7 +46,7 @@ def chatbot():
         data = request.json
         print(data)
         ques = data.get('question')
-        if ques is not None:
+        if ques is not "":
             globals()["text_list"], globals()["source_list"] = match_query(ques, database="milvus")
             sse_data = zhipuai.model_api.sse_invoke(
                 model="chatglm_pro",

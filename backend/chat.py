@@ -60,7 +60,7 @@ def chatbot():
 
             def generate():
                 for event in sse_data.events():
-                    yield f"data: {event.data}\n\n"
+                    yield f"{event.data}"
 
             return Response(generate(), mimetype='text/event-stream')
         else:

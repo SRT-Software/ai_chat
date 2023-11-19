@@ -19,7 +19,7 @@ const Chat: React.FC = () => {
     const [message, setMessage] = useState('');
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const {chatInfo, setChatInfo} = useContext(ChatContext)
-
+    const [stream, setStream] = useState(false)
     const chat_messages = chatHistory.map((Message, index) => {
         return (
             <ChatCard key={index} role={Message.role} content={Message.messages}/>
@@ -30,19 +30,16 @@ const Chat: React.FC = () => {
         if (chatInfo.Message !== ''){
             let newMessage = new ChatMessage('', chatInfo.Message, 'you')
             setChatHistory(chatHistory => [...chatHistory, newMessage])
-            setChatInfo({
-                ...chatInfo,
-                Message: '',
-            })
-
             let newMessage2 = new ChatMessage('', '', 'assistant')
             setChatHistory(chatHistory => [...chatHistory, newMessage2])
+            setStream(true)
         }
     }, [chatInfo.Message]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log(chatInfo.Message)
                 const response = await fetch(`${BASEURL}/api/data`, {
                     method: 'POST',
                     headers: {
@@ -70,6 +67,7 @@ const Chat: React.FC = () => {
 
                         const chunk = new TextDecoder().decode(value);
                         result += chunk;
+                        console.log(typeof result, result)
                         setChatHistory(chatHistory => {
                             const newHistory = [...chatHistory];
                             const lastElement = newHistory[newHistory.length - 1];
@@ -80,15 +78,18 @@ const Chat: React.FC = () => {
                 };
 
                 processStream();
-                console.log(chatHistory)
             } catch (error) {
                 console.error(error);
             }
         };
         if(chatHistory.length !== 0){
             fetchData();
+            setChatInfo({
+                ...chatInfo,
+                Message: ''
+            })
         }
-    }, [chatHistory]);
+    }, [stream]);
 
     return (
         <>

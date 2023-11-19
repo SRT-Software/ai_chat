@@ -20,11 +20,6 @@ const Chat: React.FC = () => {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const {chatInfo, setChatInfo} = useContext(ChatContext)
     const [stream, setStream] = useState(false)
-    const chat_messages = chatHistory.map((Message, index) => {
-        return (
-            <ChatCard key={index} role={Message.role} content={Message.messages}/>
-        )
-    })
 
     useEffect(() => {
         if (chatInfo.Message !== ''){
@@ -67,7 +62,6 @@ const Chat: React.FC = () => {
 
                         const chunk = new TextDecoder().decode(value);
                         result += chunk;
-                        console.log(typeof result, result)
                         setChatHistory(chatHistory => {
                             const newHistory = [...chatHistory];
                             const lastElement = newHistory[newHistory.length - 1];
@@ -84,12 +78,20 @@ const Chat: React.FC = () => {
         };
         if(chatHistory.length !== 0){
             fetchData();
+            setStream(false)
             setChatInfo({
                 ...chatInfo,
                 Message: ''
             })
         }
     }, [stream]);
+
+    const chat_messages = chatHistory.map((Message, index) => {
+        console.log("message: ", Message.messages)
+        return (
+            <ChatCard key={index} role={Message.role} content={Message.messages}/>
+        )
+    })
 
     return (
         <>

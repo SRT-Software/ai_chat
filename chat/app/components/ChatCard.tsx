@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import {Avatar} from "@mui/material";
 import {width} from "@mui/system";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 interface ChatProps {
     // 可选的属性
@@ -20,6 +20,10 @@ function ChatCard(props: ChatProps) {
     const theme = useTheme();
     const [roleText, setRoleText] = useState(props.role === 'assistant' ? "AI助手": "您")
     const [content, setContent] = useState(props.content)
+    useEffect(() => {
+        console.log(props.content)
+        setContent(props.content)
+    }, [props.content]);
     return (
         <>
             <Box sx={{

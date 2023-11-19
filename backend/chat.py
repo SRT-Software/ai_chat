@@ -66,7 +66,7 @@ def chatbot():
         else:
             def generate():
                 for i in range(2):
-                    yield f"your question is NONE\n\n"
+                    yield f""
             return Response(generate(), mimetype='text/event-stream')
 
 

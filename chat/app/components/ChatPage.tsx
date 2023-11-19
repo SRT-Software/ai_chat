@@ -34,27 +34,61 @@ const Chat: React.FC = () => {
                 ...chatInfo,
                 Message: '',
             })
-            const data = { question: chatInfo.Message };
-            let newData: PostData = {
-                question: chatInfo.Message
-            }
-            let newHeader: PostHeaders = {
-                Token: 'test'
-            }
-            axios.post(`${BASEURL}/api/data`, newData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer test',
-                }
-            })
-                .then((response: AxiosResponse) => {
-                    console.log('Response:', response.data);
-                })
-                .catch((error: any) => {
-                    console.error('Error:', error);
-                });
+
+            let newMessage2 = new ChatMessage('', '', 'assistant')
+            setChatHistory(chatHistory => [...chatHistory, newMessage2])
         }
     }, [chatInfo.Message]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${BASEURL}/api/data`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test',
+                    },
+                    body: JSON.stringify({
+                        question: chatInfo.Message
+                    }),
+                });
+
+                const stream = response.body;
+
+                // @ts-ignore
+                const reader = stream.getReader();
+                let result = '';
+
+                const processStream = async () => {
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (done) {
+                            break;
+                        }
+
+                        const chunk = new TextDecoder().decode(value);
+                        result += chunk;
+                        setChatHistory(chatHistory => {
+                            const newHistory = [...chatHistory];
+                            const lastElement = newHistory[newHistory.length - 1];
+                            lastElement.messages = result;
+                            return newHistory;
+                        })
+                    }
+                };
+
+                processStream();
+                console.log(chatHistory)
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        if(chatHistory.length !== 0){
+            fetchData();
+        }
+    }, [chatHistory]);
 
     return (
         <>

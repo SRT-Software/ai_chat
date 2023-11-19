@@ -64,7 +64,7 @@ def chatbot():
 
             return Response(generate(), mimetype='text/event-stream')
         else:
-            return Response("your question is NONE", mimetype='text/event-stream')
+            return Response("your question is NONE")
 
 
 @app.route('/api/source', methods=['GET'])

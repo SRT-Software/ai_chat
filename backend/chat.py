@@ -64,7 +64,10 @@ def chatbot():
 
             return Response(generate(), mimetype='text/event-stream')
         else:
-            return Response("your question is NONE")
+            def generate():
+                for i in range(2):
+                    yield f"your question is NONE\n\n"
+            return Response(generate(), mimetype='text/event-stream')
 
 
 @app.route('/api/source', methods=['GET'])

@@ -87,7 +87,6 @@ const Chat: React.FC = () => {
     }, [stream]);
 
     const chat_messages = chatHistory.map((Message, index) => {
-        console.log("message: ", Message.messages)
         return (
             <ChatCard key={index} role={Message.role} content={Message.messages}/>
         )

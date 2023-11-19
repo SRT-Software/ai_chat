@@ -21,7 +21,6 @@ function ChatCard(props: ChatProps) {
     const [roleText, setRoleText] = useState(props.role === 'assistant' ? "AI助手": "您")
     const [content, setContent] = useState(props.content)
     useEffect(() => {
-        console.log(props.content)
         setContent(props.content)
     }, [props.content]);
     return (

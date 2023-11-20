@@ -3,12 +3,30 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import ChatMessage from "@/app/classes/ChatMessage";
 import {useContext, useState} from "react";
 import {ChatContext, ChatInfo} from "@/app/context/chatContext";
+
+const question = ['脚手架的操作规范', 
+                '矿井内氧气含量过低怎么办', 
+                '遭遇恶劣天气应该如何处理',
+                '申报中国电力优质工程的条件',
+                '安全质量部的工作是什么',
+                '施工组织设计的编制的要求',
+                '如何防止高处坠落事故',
+                '人工挖孔桩的设计要求',
+                '如何防止边坡坍塌',
+                '塔机的尾部与周围建筑物及其外围施工设施之间的安全距离是多少',
+                '如何防止缆索起重机起重伤害',
+                '如何防止高压触电事故',
+                '为了防止机械伤害事故，应采取哪些措施',
+                '什么情况下严禁对已充油的变压器、电抗器的微小渗漏进行补焊',
+                '如何防止燃油罐区火灾',
+                '如何防止场内车辆伤害事故',
+                '液氨储罐区的设置要求']
 
 export default function InputBar() {
     const {chatInfo, setChatInfo} = useContext(ChatContext);
@@ -31,6 +49,12 @@ export default function InputBar() {
           }
     }
 
+    const getTips = ()=>{
+        const num = 16;
+        let index = Math.floor(Math.random() * (num + 1))
+        setValue(question[index])
+    }
+
 
     return (
         <Paper
@@ -44,8 +68,8 @@ export default function InputBar() {
             }}
             onKeyDown={handleKeyPress}
         >
-            <IconButton sx={{ p: '10px' }} aria-label="menu">
-                <MenuIcon />
+            <IconButton sx={{ p: '10px' }} aria-label="menu" onClick={getTips}>
+                <TipsAndUpdatesIcon />
             </IconButton>
             <InputBase
                 sx={{ ml: 1, flex: 1 }}

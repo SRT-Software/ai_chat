@@ -7,7 +7,11 @@ import InputBar from "@/app/components/InputBar";
 import {ChatContext, ChatProvider} from "@/app/context/chatContext";
 import axios, {AxiosResponse} from "axios";
 import {BASEURL} from "@/app/config/configs";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 interface PostData {
     question: string
 }
@@ -22,9 +26,13 @@ const Chat: React.FC = () => {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([primarymessage]);
     const {chatInfo, setChatInfo} = useContext(ChatContext)
     const [stream, setStream] = useState(false)
+    const [textList, setTextList] = useState([])
+    const [sourceList, setSourceList] = useState([])
 
     useEffect(() => {
         if (chatInfo.Message !== ''){
+            setTextList([])
+            setSourceList([])
             let newMessage = new ChatMessage('', chatInfo.Message, 'you')
             setChatHistory(chatHistory => [...chatHistory, newMessage])
             let newMessage2 = new ChatMessage('', '', 'assistant')
@@ -59,6 +67,22 @@ const Chat: React.FC = () => {
                         const { done, value } = await reader.read();
 
                         if (done) {
+                            if(result != ''){
+                                axios.get(`${BASEURL}/api/source`, {
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': 'Bearer test',
+                                    },
+                                }).then(response => {
+                                    // 处理响应数据
+                                    setTextList(response.data.texts)
+                                    setSourceList(response.data.sources)
+                                    console.log(response.data);
+                                }).catch(error => {
+                                    // 处理请求错误
+                                    console.error(error);
+                                });
+                            }
                             break;
                         }
 
@@ -73,13 +97,14 @@ const Chat: React.FC = () => {
                     }
                 };
 
-                processStream();
+                await processStream();
+                return
             } catch (error) {
                 console.error(error);
             }
         };
         if(chatHistory.length !== 0){
-            fetchData();
+            fetchData()
             setStream(false)
             setChatInfo({
                 ...chatInfo,
@@ -97,11 +122,32 @@ const Chat: React.FC = () => {
     const messagesEnd = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
-        console.log("bottom")
+        // console.log("bottom")
         if (messagesEnd && messagesEnd.current) {
             messagesEnd.current.scrollTop = messagesEnd.current.scrollHeight;
         }
     };
+
+    const textAccordions = textList.map((text, index) => {
+        let title = `${sourceList[index]}`
+        return (
+            <Accordion key={index}>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                >
+                    <Typography>{title}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography>
+                        {text}
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+        )
+    })
+
 
     useEffect(() => {
         scrollToBottom();
@@ -124,6 +170,18 @@ const Chat: React.FC = () => {
             ref={messagesEnd}
             >
                 {chat_messages}
+                <Accordion key={'files'}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                    >
+                        <Typography>参考文献</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        {textAccordions}
+                    </AccordionDetails>
+                </Accordion>
             </Box>
             <InputBar />
         </div>

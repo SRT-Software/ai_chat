@@ -5,6 +5,7 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
+import SendIcon from '@mui/icons-material/Send';
 import ChatMessage from "@/app/classes/ChatMessage";
 import {useContext, useState} from "react";
 import {ChatContext, ChatInfo} from "@/app/context/chatContext";
@@ -24,19 +25,24 @@ export default function InputBar() {
         })
         setValue('')
     }
+    const handleKeyPress = (e)=>{
+        if (e.key === "Enter") {
+            handleSend();
+          }
+    }
 
 
     return (
         <Paper
-            component="form"
             sx={{
                 p: '2px 4px',
                 display: 'flex',
                 alignItems: 'center',
                 width: 620,
-                marginLeft: '25%',
-                marginTop: '30px',
-        }}
+                margin: 'auto',
+                marginTop:'20px',
+            }}
+            onKeyDown={handleKeyPress}
         >
             <IconButton sx={{ p: '10px' }} aria-label="menu">
                 <MenuIcon />
@@ -49,7 +55,7 @@ export default function InputBar() {
                 value={value}
             />
             <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSend}>
-                <SearchIcon />
+                <SendIcon />
             </IconButton>
             <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
         </Paper>

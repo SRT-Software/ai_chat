@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState, useRef} from 'react';
 import Box from "@mui/material/Box";
 import ChatCard from "@/app/components/ChatCard";
 
@@ -7,6 +7,7 @@ import InputBar from "@/app/components/InputBar";
 import {ChatContext, ChatProvider} from "@/app/context/chatContext";
 import axios, {AxiosResponse} from "axios";
 import {BASEURL} from "@/app/config/configs";
+import Typography from '@mui/material/Typography';
 interface PostData {
     question: string
 }
@@ -17,7 +18,8 @@ interface PostHeaders{
 
 const Chat: React.FC = () => {
     const [message, setMessage] = useState('');
-    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+    const primarymessage = new ChatMessage('', "你好！我是ai问答助手，很高兴为您提供帮助。请问您有什么问题需要我解答？",'assistant')
+    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([primarymessage]);
     const {chatInfo, setChatInfo} = useContext(ChatContext)
     const [stream, setStream] = useState(false)
 
@@ -92,23 +94,39 @@ const Chat: React.FC = () => {
         )
     })
 
+    const messagesEnd = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        console.log("bottom")
+        if (messagesEnd && messagesEnd.current) {
+            messagesEnd.current.scrollTop = messagesEnd.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chatHistory]);
+
     return (
-        <>
+        <div style={{backgroundColor:"#F5F5F5"}}>
+            <Typography variant='h2' fontWeight={"bold"} gutterBottom><center>AI问答</center></Typography>
             <Box sx={{
                 height: '500px',
                 width: '600px',
                 overflow: 'auto',
                 border: '1px solid #ccc',
-                borderRadius: '4px',
+                borderRadius: '5px',
                 padding: '10px',
                 display: 'block',
-                marginLeft: '25%',
-                marginTop: '2%',
-            }}>
+                margin: 'auto',
+                bgcolor:"white",
+            }} 
+            ref={messagesEnd}
+            >
                 {chat_messages}
             </Box>
-            <InputBar/>
-        </>
+            <InputBar />
+        </div>
     );
 };
 

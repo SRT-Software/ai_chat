@@ -5,7 +5,7 @@ import {ChatProvider} from "@/app/context/chatContext";
 export default function Home() {
 
   return (
-      <main>
+      <main style={{backgroundColor:"#F5F5F5"}}>
           <ChatProvider>
               <ChatPage/>
           </ChatProvider>

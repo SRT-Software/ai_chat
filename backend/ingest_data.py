@@ -19,6 +19,7 @@ import os
 import ast
 import json
 import subprocess
+from flask import Flask, request, jsonify, Response, abort
 
 filePath = 'docs'
 zhipuai.api_key = CHATGLM_KEY
@@ -29,13 +30,14 @@ data_path = "data.txt"
 meta_path = "meta_path"
 
 chunk_index = 0
+app = Flask(__name__)
+
 
 def split_list(long_list, chunk_size):
     return [long_list[i:i + chunk_size] for i in range(0, len(long_list), chunk_size)]
 
 
 def initPinecone():
-
     try:
         pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
         return pinecone
@@ -54,15 +56,12 @@ def initMilvus():
             cmd_command = 'docker-compose up -d'  # 替换为您要执行的实际CMD命令
             subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
     if not utility.has_collection(milvus_collection_name):
-        # 向量个数
-        num_vec = 10000
         # 向量维度
         vec_dim = 1024
         # metric_type: 向量相似度度量标准, MetricType.IP是向量内积; MetricType.L2是欧式距离
         fields = [
-            FieldSchema(name="index", dtype=DataType.INT64, is_primary=True, auto_id=False),
             FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=vec_dim),
-            FieldSchema(name="metadata", dtype=DataType.VARCHAR, max_length=1024)
+            FieldSchema(name="metadata", dtype=DataType.VARCHAR, max_length=8192, auto_id=True)
         ]
 
         schema = CollectionSchema(fields, milvus_collection_name)
@@ -72,6 +71,15 @@ def initMilvus():
         pdf_milvus = Collection(milvus_collection_name)
         return pdf_milvus
 
+
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+    response = {
+        'msg': 'upload successfully'
+    }
+    return jsonify(response)
+
+
 def get_files_in_directory(directory_path):
     file_list = []
     for root, dirs, files in os.walk(directory_path):
@@ -79,6 +87,7 @@ def get_files_in_directory(directory_path):
             file_path = os.path.join(root, file_name)
             file_list.append(file_path)
     return file_list
+
 
 def get_single_file_doc(path, model="normal"):
     rawDocs = []
@@ -93,6 +102,8 @@ def get_single_file_doc(path, model="normal"):
         textSplitter = RecursiveCharacterTextSplitter(chunk_size=120, chunk_overlap=80)
     docs = textSplitter.split_documents(rawDocs)
     return docs
+
+
 def getDocs(model="normal"):
     files_list = get_files_in_directory("docs")
     rawDocs = []
@@ -101,17 +112,6 @@ def getDocs(model="normal"):
         doc = pdfLoader.load()
         for d in doc:
             rawDocs.append(d)
-
-    # directoryLoader = DirectoryLoader('docs', glob='*.pdf', loader_cls=PyPDFLoader)
-    # rawDocs = directoryLoader.load()
-    # rawDocs = rawDocs[10:20]
-
-    # print(len(d))
-    # rawDocs = []
-    # for i in range(3):
-    #     rawDocs.append(d[i+10])
-    # splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=150)
-    # s = splitter.split_documents(rawDocs)
     if model == 'ali':
         textSplitter = SemanticTextSplitter(pdf=True)
     else:
@@ -120,10 +120,7 @@ def getDocs(model="normal"):
     return docs
 
 
-def ingest(docs, database="pinecone"):
-    # if not os.path.exists(data_path):
-        # prepare basic vector
-        # print('docs:\n', docs)
+def ingest(docs, database="milvus"):
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # print('content', len(content_list))
@@ -149,24 +146,6 @@ def ingest(docs, database="pinecone"):
         for embedding in embedding_list:
             file.write(f"{embedding}\n")
 
-    # print("start read")
-    # embedding_list = []
-    # str_list = []
-    # with open(data_path, 'r') as file:
-    #     content = file.read()
-    #     str_list = content.split('\n')
-    # print("end read")
-    # si = 0
-    # for s in str_list:
-    #     try:
-    #         float_vector = ast.literal_eval(s)
-    #         embedding_list.append(float_vector)
-    #     except Exception as e:
-    #         print(f"{str(e)}")
-    #         print(si)
-    #     si += 1
-    #
-    # print(len(embedding_list))
     tuple_list = []
     metadatas = []
     for i in range(len(embedding_list)):
@@ -194,13 +173,9 @@ def ingest(docs, database="pinecone"):
         milvus = initMilvus()
         # 把向量添加到刚才建立的表格中
         # ids可以为None，使用自动生成的id
-        json_list = [json.dumps(item)for item in metadatas]
-        # for jsons in json_list:
-        #     print(len(jsons))
-        # json_shorts = split_list(json_list, 1000)
+        json_list = [json.dumps(item) for item in metadatas]
         try:
             entities = [
-                [i + globals()["chunk_index"] for i in range(len(embedding_list))],
                 embedding_list,  # field embeddings
                 json_list,  # field metadata
             ]
@@ -230,7 +205,7 @@ if __name__ == '__main__':
     index = 0
     globals()["chunk_index"] = 0
     for file in files:
-        if file.endswith('.pdf') and index > 44:
+        if file.endswith('.pdf'):
             print(f"file{index}: {file}, total: {len(files)}")
             doc = get_single_file_doc(file)
             ingest(docs=doc, database="milvus")

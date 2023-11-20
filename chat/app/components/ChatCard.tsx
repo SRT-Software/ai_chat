@@ -61,7 +61,6 @@ function ChatCard(props: ChatProps) {
                     </Box>
                 </Card>
             </Box>
-            <Divider/>
         </>
     );
 }

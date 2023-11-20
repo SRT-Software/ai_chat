@@ -4,11 +4,14 @@ import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
-import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import ChatMessage from "@/app/classes/ChatMessage";
-import {useContext, useState} from "react";
+import {useContext, useState,useEffect} from "react";
 import {ChatContext, ChatInfo} from "@/app/context/chatContext";
+import ClearIcon from '@mui/icons-material/Clear';
+import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import StopIcon from '@mui/icons-material/Stop';
+import Tooltip from '@mui/material/Tooltip'
 
 const question = ['脚手架的操作规范', 
                 '矿井内氧气含量过低怎么办', 
@@ -55,6 +58,36 @@ export default function InputBar() {
         setValue(question[index])
     }
 
+    const clear = ()=>{
+        setValue("")
+    }
+
+
+    const [speaking, setSpeaking] = useState(false)
+    var recognition = new webkitSpeechRecognition();
+    recognition.onaudioend = function(event){
+        setSpeaking(false)
+        recognition.stop()
+    }
+    recognition.interimResults = true;
+    recognition.lang = "zh"
+    recognition.onresult = function(event) {
+        var result = event.results[event.results.length - 1][0].transcript;
+        console.log("result:")
+        console.log(result)
+        setValue(result)
+    };
+    recognition.onerror = function(event){
+        console.log(event)
+    }
+    const startSpeaking=()=>{
+        setSpeaking(true)
+        recognition.start()
+    }
+    const stopSpeaking=()=>{
+        setSpeaking(false)
+        recognition.abort()
+    }
 
     return (
         <Paper
@@ -67,10 +100,12 @@ export default function InputBar() {
                 marginTop:'20px',
             }}
             onKeyDown={handleKeyPress}
-        >
-            <IconButton sx={{ p: '10px' }} aria-label="menu" onClick={getTips}>
-                <TipsAndUpdatesIcon />
-            </IconButton>
+        >  
+            <Tooltip title="提示词" arrow>
+                <IconButton sx={{ p: '10px' }} aria-label="menu" onClick={getTips}>
+                    <TipsAndUpdatesIcon />
+                </IconButton>
+            </Tooltip>
             <InputBase
                 sx={{ ml: 1, flex: 1 }}
                 placeholder="请输入内容"
@@ -78,9 +113,29 @@ export default function InputBar() {
                 onChange={handleTextFieldChange}
                 value={value}
             />
-            <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSend}>
-                <SendIcon />
-            </IconButton>
+            {(value != null && value != "") ?
+            <Tooltip title="清除" arrow>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={clear}>
+                    <ClearIcon />
+                </IconButton>
+            </Tooltip>
+            :null}
+            {speaking
+            ?<Tooltip title="语音" arrow>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={stopSpeaking}>
+                <StopIcon />
+                </IconButton>
+            </Tooltip>
+            :<Tooltip title="语音" arrow>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={startSpeaking}>
+                <KeyboardVoiceIcon />
+                </IconButton>
+            </Tooltip>}
+            <Tooltip title="发送" arrow>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSend}>
+                    <SendIcon />
+                </IconButton>
+            </Tooltip>
             <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
         </Paper>
     );

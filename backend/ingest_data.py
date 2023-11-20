@@ -60,11 +60,12 @@ def initMilvus():
         vec_dim = 1024
         # metric_type: 向量相似度度量标准, MetricType.IP是向量内积; MetricType.L2是欧式距离
         fields = [
+            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
             FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=vec_dim),
             FieldSchema(name="metadata", dtype=DataType.VARCHAR, max_length=8192)
         ]
 
-        schema = CollectionSchema(fields, milvus_collection_name, auto_id=True)
+        schema = CollectionSchema(fields, milvus_collection_name)
         pdf_milvus = Collection(milvus_collection_name, schema)
         return pdf_milvus
     else:

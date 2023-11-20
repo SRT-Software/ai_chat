@@ -170,7 +170,7 @@ const Chat: React.FC = () => {
             ref={messagesEnd}
             >
                 {chat_messages}
-                <Accordion key={'files'}>
+                {(textList.length != 0) &&<Accordion key={'files'}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         aria-controls="panel1a-content"
@@ -181,7 +181,19 @@ const Chat: React.FC = () => {
                     <AccordionDetails>
                         {textAccordions}
                     </AccordionDetails>
-                </Accordion>
+                </Accordion>}
+                {/* <Accordion key={'files'}>
+                <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                    >
+                        <Typography>参考文献</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        {textAccordions}
+                    </AccordionDetails>
+                </Accordion> */}
             </Box>
             <InputBar />
         </div>

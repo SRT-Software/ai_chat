@@ -24,7 +24,7 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
 @main.route('/api/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     if request.method == 'OPTIONS':
-        return app.make_default_options_response()
+        return main.make_default_options_response()
     else:
         data = request.json
         print(data)

@@ -70,6 +70,9 @@ def initMilvus():
 
 @file.route('/file/upload', methods=['POST'])
 def upload_file():
+    async def saveFile(filepath):
+        await ingest(docs=get_single_file_doc(filepath), database="milvus")
+
     if request.method == 'POST':
         # 检查请求中是否包含文件
         print(request.files)
@@ -84,13 +87,13 @@ def upload_file():
 
         # 处理文件上传
         if file:
-            filename = str(filePath + '/' + file.filename)
-            file.save(filename)  # 保存文件到当前工作目录
-        ingest(docs=get_single_file_doc(filename), database="milvus")
-        response = {
-            'msg': 'upload successfully'
-        }
-        return jsonify(response)
+            filepath = str(filePath + '/' + file.filename)
+            file.save(filepath)  # 保存文件到当前工作目录
+            saveFile(filepath)
+            response = {
+                'msg': 'upload successfully'
+            }
+            return jsonify(response)
     response = {
         'msg': 'wrong method'
     }

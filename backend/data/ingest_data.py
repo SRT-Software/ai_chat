@@ -76,7 +76,7 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
     doc.page_content = audiotext
     doc.metadata = {
         "page": 0,
-        "source": "audio",
+        "source": str(datetime.now()).replace(' ', '-') + " audio",
     }
     rawDocs.append(doc)
 

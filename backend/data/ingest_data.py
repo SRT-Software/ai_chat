@@ -76,7 +76,7 @@ def create_pdf_from_string(content, output_file):
     pdf_writer = PdfWriter()
 
     # 创建 PDF 页面
-    pdf_page = pdf_writer.addBlankPage(595, 842)  # A4 页面大小
+    pdf_page = pdf_writer.add_blank_page(595, 842)  # A4 页面大小
 
     # 设置中文字体
     pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))

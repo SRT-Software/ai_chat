@@ -8,6 +8,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(main)
 app.register_blueprint(file)
 
+
 @app.before_request
 def check_token():
     # 获取请求头中的 token

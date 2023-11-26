@@ -1,3 +1,6 @@
+import time
+
+from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
 import pinecone
@@ -16,6 +19,7 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint
+from datetime import datetime
 
 filePath = 'docs'
 
@@ -68,11 +72,39 @@ def initMilvus():
         return pdf_milvus
 
 
+def create_audio_docs(audiotext, audiofilepath, model="normal"):
+    rawDocs = []
+    doc = Document
+    doc.page_content = audiotext
+    doc.metadata = {
+        "page": 0,
+        "source": str(datetime.now()).replace(' ', '-') + " audio",
+    }
+    rawDocs.append(doc)
+
+    if model == 'ali':
+        textSplitter = SemanticTextSplitter(pdf=True)
+    else:
+        textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    docs = textSplitter.split_documents(rawDocs)
+    return docs
+
+
 @file.route('/file/upload', methods=['POST'])
-async def upload_file():
-    async def saveFile(filepath):
-        file.save(filepath)  # 保存文件到当前工作目录
-        await ingest(docs=get_single_file_doc(filepath), database="milvus")
+def upload_file():
+    def saveFile(postfile, path):
+        postfile.save(path)  # 保存文件到当前工作目录
+        try:
+            ingest(docs=get_single_file_doc(path), database="milvus")
+        except Exception as e:
+            print(e)
+            # 创建响应对象
+            response = e
+
+            # 修改响应的状态码
+            response.status_code = 201
+
+            return response
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -89,11 +121,35 @@ async def upload_file():
         # 处理文件上传
         if file:
             filepath = str(filePath + '/' + file.filename)
-            await saveFile(filepath)
+            saveFile(file, filepath)
             response = {
                 'msg': 'upload successfully'
             }
             return jsonify(response)
+    response = {
+        'msg': 'wrong method'
+    }
+    return jsonify(response)
+
+
+@file.route('/file/audio', methods=['POST'])
+def upload_audio():
+    def saveFile(audiotext, audiofilepath):
+        ingest(docs=create_audio_docs(audiotext, audiofilepath), database="milvus")
+
+    if request.method == 'POST':
+        # 检查请求中是否包含文件
+        data = request.json
+        text = data.get('text')
+        current_time = datetime.now()
+        # 创建 PDF 文件
+        filepath = str(filePath + '/' + str(current_time).replace(' ', '-')) + ".pdf"
+
+        saveFile(text, filepath)
+        response = {
+            'msg': 'upload successfully'
+        }
+        return jsonify(response)
     response = {
         'msg': 'wrong method'
     }
@@ -113,6 +169,8 @@ def get_single_file_doc(path, model="normal"):
     rawDocs = []
     pdfLoader = PyPDFLoader(file_path=path)
     doc = pdfLoader.load()
+    if(doc[0].page_content == ''):
+        raise "page empty"
     print(doc)
     for d in doc:
         rawDocs.append(d)
@@ -141,7 +199,7 @@ def getDocs(model="normal"):
     return docs
 
 
-async def ingest(docs, database="milvus"):
+def ingest(docs, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]

@@ -54,6 +54,7 @@ export default function InputBar(props:inputProps) {
             setValue('')
         }
     }
+    // @ts-ignore
     const handleKeyPress = (e)=>{
         if (e.key === "Enter") {
             handleSend();

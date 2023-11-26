@@ -111,7 +111,7 @@ def upload_file():
         # 处理文件上传
         if file:
             filepath = str(filePath + '/' + file.filename)
-            await saveFile(file, filepath)
+            saveFile(file, filepath)
             response = {
                 'msg': 'upload successfully'
             }
@@ -135,7 +135,7 @@ def upload_audio():
         # 创建 PDF 文件
         filepath = str(filePath + '/' + str(current_time).replace(' ', '-')) + ".pdf"
 
-        await saveFile(text, filepath)
+        saveFile(text, filepath)
         response = {
             'msg': 'upload successfully'
         }

@@ -17,7 +17,7 @@ import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint
 
-filePath = '/docs'
+filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
 

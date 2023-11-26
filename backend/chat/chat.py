@@ -2,7 +2,7 @@ import zhipuai
 from query import match_query
 import json
 from flask import Flask, request, jsonify, Response, abort, Blueprint
-
+from flask_cors import CORS
 
 from view.main import main
 
@@ -20,7 +20,9 @@ QA_TEMPLATE = 'You are a helpful AI assistant. Use the following pieces of conte
 QUES_TEMPLATE = 'make 1 relative question about {}' \
                 'you must give me the question instead of solution'
 
-
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+app.register_blueprint(main)
 @main.route('/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     if request.method == 'OPTIONS':

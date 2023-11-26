@@ -6,6 +6,8 @@ import json
 import subprocess
 
 zhipuai.api_key = CHATGLM_KEY
+
+
 def match_query(ques, database="pinecone"):
     print('ques:', ques)
     result = zhipuai.model_api.invoke(

@@ -35,7 +35,7 @@ export default function FileDialog(){
     const [openfail,setOpenfail] = useState(false)
     
     async function handleFileOk() {
-        if(file === null){
+        if(file === null || file === undefined){
             setFileNull(true)
         }else{
             setOpenFile(false)

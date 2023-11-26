@@ -4,6 +4,8 @@ import json
 from flask import Flask, request, jsonify, Response, abort, Blueprint
 from flask_cors import CORS
 
+from config.prepare import CHATGLM_KEY
+
 text_list = []
 source_list = []
 
@@ -22,8 +24,9 @@ main = Blueprint('main', __name__)
 
 @main.route('/api/data', methods=['POST', 'OPTIONS'])
 def chatbot():
+    zhipuai.api_key = CHATGLM_KEY
     if request.method == 'OPTIONS':
-        return main.make_default_options_response()
+        return "Options"
     else:
         data = request.json
         print(data)

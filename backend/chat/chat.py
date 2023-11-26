@@ -1,5 +1,5 @@
 import zhipuai
-from query import match_query
+from chat.query import match_query
 import json
 from flask import Flask, request, jsonify, Response, abort, Blueprint
 from flask_cors import CORS

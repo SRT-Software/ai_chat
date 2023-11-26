@@ -17,8 +17,6 @@ import json
 import subprocess
 from flask import Flask, request, jsonify
 
-from view.main import main
-
 filePath = '../docs'
 zhipuai.api_key = CHATGLM_KEY
 

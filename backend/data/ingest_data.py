@@ -18,7 +18,6 @@ import subprocess
 from flask import Flask, request, jsonify
 
 filePath = '../docs'
-zhipuai.api_key = CHATGLM_KEY
 
 milvus_collection_name = "pdf_milvus"
 
@@ -137,6 +136,7 @@ def getDocs(model="normal"):
 
 
 async def ingest(docs, database="milvus"):
+    zhipuai.api_key = CHATGLM_KEY
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # print('content', len(content_list))

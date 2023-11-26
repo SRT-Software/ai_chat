@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import Flask, request, jsonify, Response, abort, Blueprint
-main = Blueprint('main', __name__)
+main = Blueprint('api', __name__)
 
 @main.before_request
 def check_token():

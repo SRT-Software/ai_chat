@@ -21,7 +21,7 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
                 'you must give me the question instead of solution'
 
 
-@main.route('/api/data', methods=['POST', 'OPTIONS'])
+@main.route('/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     if request.method == 'OPTIONS':
         return main.make_default_options_response()
@@ -53,7 +53,7 @@ def chatbot():
             return Response(generate(), mimetype='text/event-stream')
 
 
-@main.route('/api/source', methods=['GET'])
+@main.route('/source', methods=['GET'])
 def get_sources():
     response = {
         'texts': globals()['text_list'],
@@ -78,6 +78,3 @@ def relative_ques(ques):
     # print(data)
     return data
 
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)

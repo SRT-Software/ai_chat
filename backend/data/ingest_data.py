@@ -80,7 +80,8 @@ def create_pdf_from_string(content, output_file):
     c.setFont("Helvetica", 12)
 
     # 将中文文本写入 PDF
-    p = Paragraph(content)
+    print(content)
+    p = Paragraph(text=content)
     p.drawOn(c, 100, 700)
 
     # 保存并关闭 PDF 文件
@@ -129,7 +130,6 @@ async def upload_audio():
         # 检查请求中是否包含文件
         data = request.json
         text = data.get('text')
-        print(text)
         current_time = datetime.now()
         # 创建 PDF 文件
         filepath = str(filePath + '/' + str(current_time).replace(' ', '-')) + ".pdf"

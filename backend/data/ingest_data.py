@@ -110,6 +110,7 @@ def get_single_file_doc(path, model="normal"):
     rawDocs = []
     pdfLoader = PyPDFLoader(file_path=path)
     doc = pdfLoader.load()
+    print(doc)
     for d in doc:
         rawDocs.append(d)
 

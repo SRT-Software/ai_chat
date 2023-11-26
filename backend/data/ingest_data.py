@@ -16,11 +16,12 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+import pdfkit
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
+from reportlab.pdfbase.ttfonts import TTFont
+
 filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
@@ -73,18 +74,13 @@ def initMilvus():
 
 
 def create_pdf_from_string(content, output_file):
-    # 创建一个 PDF 画布
-    c = canvas.Canvas(output_file, lang="zh")
+    content = '这是一个测试文件。' + '<br>' + 'Hello from Python!'
 
-    # 设置字体和字号
-    c.setFont("Helvetica", 12)
+    html = f'<html><head><meta charset="UTF-8"></head>' \
+           f'<body><div align="center"><p>{content}</p></div></body></html>'
 
-    # 将中文文本写入 PDF
-    c.setFillColorRGB(0, 0, 0)
-    c.drawString(40, 100, content)
-
-    # 保存并关闭 PDF 文件
-    c.save()
+    # 转换为PDF
+    pdfkit.from_string(html, output_file)
 
 
 @file.route('/file/upload', methods=['POST'])

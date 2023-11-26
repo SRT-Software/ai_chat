@@ -116,7 +116,7 @@ async def upload_file():
 
 
 @file.route('/file/audio', methods=['POST'])
-async def upload_file():
+async def upload_audio():
     async def saveFile(audiotext, audiofilepath):
         create_pdf_from_string(audiotext, audiofilepath)
         await ingest(docs=get_single_file_doc(audiofilepath), database="milvus")

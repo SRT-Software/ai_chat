@@ -16,11 +16,11 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint
-import pdfkit
 from datetime import datetime
-from reportlab.pdfgen import canvas
-from reportlab.platypus import Paragraph
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 
 filePath = 'docs'
 
@@ -31,7 +31,7 @@ meta_path = "meta_path"
 
 chunk_index = 0
 file = Blueprint('file', __name__)
-
+path_wk = "C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 
 def split_list(long_list, chunk_size):
     return [long_list[i:i + chunk_size] for i in range(0, len(long_list), chunk_size)]
@@ -74,12 +74,12 @@ def initMilvus():
 
 
 def create_pdf_from_string(content, output_file):
+    pdfmetrics.registerFont(TTFont('雅黑', 'Yahei Mono.ttf'))
 
-    html = '&lt;html&gt;&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;/head&gt;' \
-           '&lt;body&gt;&lt;div align="center"&gt;&lt;p&gt;%s&lt;/p&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;' % content
-
-    # 转换为PDF
-    pdfkit.from_string(html, output_file)
+    c = canvas.Canvas("Report.pdf", pagesize=letter)
+    c.setFont('雅黑', 12)
+    c.drawString(30, 750, '你好，这是一个示例文本')
+    c.save()
 
 
 @file.route('/file/upload', methods=['POST'])

@@ -125,10 +125,11 @@ async def upload_audio():
         # 检查请求中是否包含文件
         data = request.json
         text = data.get('text')
+        print(text)
         current_time = datetime.now()
         # 创建 PDF 文件
         filepath = str(filePath + '/' + str(current_time).replace(' ', '-'))
-        print(filepath)
+
         await saveFile(text, filepath)
         response = {
             'msg': 'upload successfully'

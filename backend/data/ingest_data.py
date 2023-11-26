@@ -84,7 +84,7 @@ def upload_file():
 
         # 处理文件上传
         if file:
-            filename = filePath + '/' + file.filename
+            filename = str(filePath + '/' + file.filename)
             file.save(filename)  # 保存文件到当前工作目录
         ingest(docs=get_single_file_doc(file), database="milvus")
         response = {

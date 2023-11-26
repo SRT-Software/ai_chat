@@ -9,6 +9,7 @@ import subprocess
 def match_query(ques, database="pinecone"):
     zhipuai.api_key = CHATGLM_KEY
     print('ques:', ques)
+    print('key: ', CHATGLM_KEY)
     result = zhipuai.model_api.invoke(
         model="text_embedding",
         prompt=ques

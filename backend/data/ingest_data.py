@@ -1,3 +1,5 @@
+import time
+
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
@@ -91,7 +93,9 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 @file.route('/file/upload', methods=['POST'])
 async def upload_file():
     async def saveFile(filepath):
-        await file.save(filepath)  # 保存文件到当前工作目录
+        file.save(filepath)  # 保存文件到当前工作目录
+        while not file.is_saved:
+            time.sleep(0.1)  # 等待0.1秒
         await ingest(docs=get_single_file_doc(filepath), database="milvus")
 
     if request.method == 'POST':

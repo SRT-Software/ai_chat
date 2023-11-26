@@ -94,8 +94,7 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 async def upload_file():
     async def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
-        while not os.path.exists(path):
-            time.sleep(0.1)  # 等待0.1秒
+        time.sleep(5)
         await ingest(docs=get_single_file_doc(path), database="milvus")
 
     if request.method == 'POST':

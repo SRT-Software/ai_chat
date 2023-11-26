@@ -20,6 +20,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from datetime import datetime
 from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph
 filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
@@ -73,13 +74,14 @@ def initMilvus():
 
 def create_pdf_from_string(content, output_file):
     # 创建一个 PDF 画布
-    c = canvas.Canvas(output_file)
+    c = canvas.Canvas(output_file, lang="zh")
 
     # 设置字体和字号
     c.setFont("Helvetica", 12)
 
     # 将中文文本写入 PDF
-    c.drawString(100, 700, content)
+    p = Paragraph(content)
+    p.drawOn(c, 100, 700)
 
     # 保存并关闭 PDF 文件
     c.save()

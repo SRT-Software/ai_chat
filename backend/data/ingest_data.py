@@ -31,7 +31,6 @@ meta_path = "meta_path"
 
 chunk_index = 0
 file = Blueprint('file', __name__)
-path_wk = "C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 
 def split_list(long_list, chunk_size):
     return [long_list[i:i + chunk_size] for i in range(0, len(long_list), chunk_size)]
@@ -76,9 +75,9 @@ def initMilvus():
 def create_pdf_from_string(content, output_file):
     pdfmetrics.registerFont(TTFont('雅黑', 'Yahei Mono.ttf'))
 
-    c = canvas.Canvas("Report.pdf", pagesize=letter)
+    c = canvas.Canvas(output_file, pagesize=letter)
     c.setFont('雅黑', 12)
-    c.drawString(30, 750, '你好，这是一个示例文本')
+    c.drawString(30, 750, content)
     c.save()
 
 

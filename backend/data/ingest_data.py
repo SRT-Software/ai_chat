@@ -92,11 +92,11 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 
 @file.route('/file/upload', methods=['POST'])
 async def upload_file():
-    async def saveFile(filepath):
-        file.save(filepath)  # 保存文件到当前工作目录
-        while not file.is_saved:
+    async def saveFile(postfile, path):
+        postfile.save(path)  # 保存文件到当前工作目录
+        while not os.path.exists(path):
             time.sleep(0.1)  # 等待0.1秒
-        await ingest(docs=get_single_file_doc(filepath), database="milvus")
+        await ingest(docs=get_single_file_doc(path), database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -113,7 +113,7 @@ async def upload_file():
         # 处理文件上传
         if file:
             filepath = str(filePath + '/' + file.filename)
-            await saveFile(filepath)
+            await saveFile(file, filepath)
             response = {
                 'msg': 'upload successfully'
             }

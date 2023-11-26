@@ -69,7 +69,6 @@ def initMilvus():
         return pdf_milvus
 
 
-@main.route('/upload', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
         # 检查请求中是否包含文件

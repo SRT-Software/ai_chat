@@ -17,7 +17,7 @@ QA_TEMPLATE = 'You are a helpful AI assistant. Use the following pieces of conte
 QUES_TEMPLATE = 'make 1 relative question about {}' \
                 'you must give me the question instead of solution'
 
-main = Blueprint('chat', __name__)
+main = Blueprint('main', __name__)
 
 
 @main.route('/api/data', methods=['POST', 'OPTIONS'])

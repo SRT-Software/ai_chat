@@ -19,6 +19,7 @@ import os
 import ast
 import json
 import subprocess
+import asyncio
 from flask import Flask, request, jsonify, Response, abort
 
 filePath = 'docs'
@@ -75,8 +76,28 @@ def initMilvus():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
+    if request.method == 'POST':
+        # 检查请求中是否包含文件
+        if 'file' not in request.files:
+            return 'No file part in the request'
+
+        file = request.files['file']
+
+        # 检查文件名是否为空
+        if file.filename == '':
+            return 'No selected file'
+
+        # 处理文件上传
+        if file:
+            filename = "doc/" + file.filename
+            file.save(filename)  # 保存文件到当前工作目录
+        ingest(docs=get_single_file_doc(file), database="milvus")
+        response = {
+            'msg': 'upload successfully'
+        }
+        return jsonify(response)
     response = {
-        'msg': 'upload successfully'
+        'msg': 'wrong method'
     }
     return jsonify(response)
 
@@ -100,7 +121,7 @@ def get_single_file_doc(path, model="normal"):
     if model == 'ali':
         textSplitter = SemanticTextSplitter(pdf=True)
     else:
-        textSplitter = RecursiveCharacterTextSplitter(chunk_size=120, chunk_overlap=80)
+        textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
     docs = textSplitter.split_documents(rawDocs)
     return docs
 
@@ -121,7 +142,7 @@ def getDocs(model="normal"):
     return docs
 
 
-def ingest(docs, database="milvus"):
+async def ingest(docs, database="milvus"):
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # print('content', len(content_list))

@@ -1,27 +1,42 @@
 'use client'
-import * as React from 'react';
-import { Button,Card } from "@mui/material";
-import {useState} from 'react'
-
+import Tooltip from "@mui/material/Tooltip";
+import React, {CSSProperties, useEffect, useRef, useState} from "react";
+import {Avatar, Button} from "@mui/material";
+import axios from "axios";
+import {BASEURL} from "@/app/config/configs";
 export default function Home() {
     const [value,setValue] = useState("")
-    var recognition = new webkitSpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "zh"
-    recognition.onresult = function(event) {
-        var result = event.results[event.results.length - 1][0].transcript;
-        console.log("result:")
-        console.log(result)
-        setValue(result)
+    const fileInputRef = useRef(null);
+    const handleClick = () => {
+        // @ts-ignore
+        fileInputRef.current.click();
     };
-    recognition.onerror = function(event){
-        console.log(event)
-    }
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        // @ts-ignore
+
+        const file = event.target.files[0];
+        console.log(file)
+        if(file !== undefined){
+            let formData = new FormData();
+            formData.append('file', file)
+            // 在这里处理选择的文件
+            let r = await axios.post(`${BASEURL}/file/upload`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': 'Bearer test',
+                },
+            })
+            console.log(r)
+        }
+    };
     return (
         <main>
-            <Button onClick={()=>recognition.start()}>speak</Button>
-            <Card>{value}</Card>
+            <Tooltip title="Click to Change" arrow>
+                <div>
+                    <Avatar onClick={handleClick}/>
+                    <input type="file" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileChange}/>
+                </div>
+            </Tooltip>
         </main>
     )
 }

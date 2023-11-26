@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # 指定.env文件的路径
-dotenv_path = '../../.env'
+dotenv_path = '.env'
 load_dotenv(dotenv_path)
 
 # 加载环境变量
@@ -12,7 +12,7 @@ PINECONE_ENVIRONMENT = os.getenv('PINECONE_ENVIRONMENT')
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 
-CHATGLM_KEY = os.getenv('CHATGLM_KEY')
+CHATGLM_KEY = "a333b62b0b117025f9c6f349b462436a.ZbNY1lGk2Pkvf4hG" # os.getenv('CHATGLM_KEY')
 
 
 if __name__ == '__main__':

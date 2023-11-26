@@ -123,8 +123,8 @@ async def upload_file():
 @file.route('/file/audio', methods=['POST'])
 async def upload_audio():
     async def saveFile(audiotext, audiofilepath):
-        create_audio_docs(audiotext, audiofilepath)
-        await ingest(docs=get_single_file_doc(audiofilepath), database="milvus")
+
+        await ingest(docs=create_audio_docs(audiotext, audiofilepath), database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件

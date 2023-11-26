@@ -74,7 +74,7 @@ def create_pdf_from_string(content, output_file):
     c = canvas.Canvas(output_file, pagesize="letter")
 
     # 设置字体和字号
-    c.setFont("宋体", 12)
+    c.setFont("Helvetica", 12)
 
     # 将字符串内容写入 PDF
     c.drawString(100, 700, content)
@@ -128,7 +128,7 @@ async def upload_audio():
         print(text)
         current_time = datetime.now()
         # 创建 PDF 文件
-        filepath = str(filePath + '/' + str(current_time).replace(' ', '-'))
+        filepath = str(filePath + '/' + str(current_time).replace(' ', '-')) + ".pdf"
 
         await saveFile(text, filepath)
         response = {

@@ -91,7 +91,7 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 @file.route('/file/upload', methods=['POST'])
 async def upload_file():
     async def saveFile(filepath):
-        file.save(filepath)  # 保存文件到当前工作目录
+        await file.save(filepath)  # 保存文件到当前工作目录
         await ingest(docs=get_single_file_doc(filepath), database="milvus")
 
     if request.method == 'POST':

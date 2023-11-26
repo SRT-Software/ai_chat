@@ -22,11 +22,11 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-app.register_blueprint(main)
-@main.route('/data', methods=['POST', 'OPTIONS'])
+
+@app.route('/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     if request.method == 'OPTIONS':
-        return main.make_default_options_response()
+        return app.make_default_options_response()
     else:
         data = request.json
         print(data)
@@ -55,7 +55,7 @@ def chatbot():
             return Response(generate(), mimetype='text/event-stream')
 
 
-@main.route('/source', methods=['GET'])
+@app.route('/source', methods=['GET'])
 def get_sources():
     response = {
         'texts': globals()['text_list'],

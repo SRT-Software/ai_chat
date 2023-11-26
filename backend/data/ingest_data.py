@@ -86,7 +86,7 @@ def upload_file():
         if file:
             filename = str(filePath + '/' + file.filename)
             file.save(filename)  # 保存文件到当前工作目录
-        ingest(docs=get_single_file_doc(file), database="milvus")
+        ingest(docs=get_single_file_doc(filename), database="milvus")
         response = {
             'msg': 'upload successfully'
         }

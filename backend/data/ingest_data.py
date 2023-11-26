@@ -80,9 +80,9 @@ def create_pdf_from_string(content, output_file):
     c.setFont("Helvetica", 12)
 
     # 将中文文本写入 PDF
-    print(content)
     p = Paragraph(text=content)
-    p.drawOn(c, 100, 700)
+    print(p)
+    p.drawOn(canvas=c, x=50, y=450)
 
     # 保存并关闭 PDF 文件
     c.save()

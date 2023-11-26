@@ -15,7 +15,7 @@ from pymilvus import (
 import os
 import json
 import subprocess
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 
 filePath = '../docs'
 
@@ -25,7 +25,7 @@ data_path = "data.txt"
 meta_path = "meta_path"
 
 chunk_index = 0
-app = Flask(__name__)
+file = Blueprint('file', __name__)
 
 
 def split_list(long_list, chunk_size):
@@ -68,7 +68,9 @@ def initMilvus():
         return pdf_milvus
 
 
+@file.route('/file/upload', __name__)
 def upload_file():
+    print(request)
     if request.method == 'POST':
         # 检查请求中是否包含文件
         if 'file' not in request.files:

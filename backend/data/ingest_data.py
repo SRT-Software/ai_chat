@@ -82,7 +82,7 @@ def create_pdf_from_string(content, output_file):
     # 将中文文本写入 PDF
     p = Paragraph(text=content)
     print(p)
-    p.drawOn(canvas=c, x=50, y=450)
+    p.draw()
 
     # 保存并关闭 PDF 文件
     c.save()

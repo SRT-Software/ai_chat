@@ -74,10 +74,9 @@ def initMilvus():
 
 
 def create_pdf_from_string(content, output_file):
-    content = '这是一个测试文件。' + '<br>' + 'Hello from Python!'
 
-    html = f'<html><head><meta charset="UTF-8"></head>' \
-           f'<body><div align="center"><p>{content}</p></div></body></html>'
+    html = '&lt;html&gt;&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;/head&gt;' \
+           '&lt;body&gt;&lt;div align="center"&gt;&lt;p&gt;%s&lt;/p&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;' % content
 
     # 转换为PDF
     pdfkit.from_string(html, output_file)

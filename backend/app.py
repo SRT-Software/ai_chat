@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, Response, abort, Blueprint
 from flask_cors import CORS
 from chat.chat import main
+from data.ingest_data import file
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(main)
-
+app.register_blueprint(file)
 
 @app.before_request
 def check_token():

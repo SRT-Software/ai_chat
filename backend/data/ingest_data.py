@@ -70,9 +70,9 @@ def initMilvus():
 
 @file.route('/file/upload', methods=['POST'])
 def upload_file():
-    print(request)
     if request.method == 'POST':
         # 检查请求中是否包含文件
+        print(request.files)
         if 'file' not in request.files:
             return 'No file part in the request'
 

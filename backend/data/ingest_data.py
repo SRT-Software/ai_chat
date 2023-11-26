@@ -68,7 +68,7 @@ def initMilvus():
         return pdf_milvus
 
 
-@file.route('/api/data', methods=['POST'])
+@file.route('/file/upload', methods=['POST'])
 def upload_file():
     print(request)
     if request.method == 'POST':

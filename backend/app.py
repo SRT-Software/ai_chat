@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, Response, abort, Blueprint
-from view.main import main
 from flask_cors import CORS
-
+from chat.chat import main
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(main)

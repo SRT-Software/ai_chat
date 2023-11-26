@@ -4,9 +4,6 @@ import json
 from flask import Flask, request, jsonify, Response, abort, Blueprint
 from flask_cors import CORS
 
-from view.main import main
-
-
 text_list = []
 source_list = []
 
@@ -20,13 +17,13 @@ QA_TEMPLATE = 'You are a helpful AI assistant. Use the following pieces of conte
 QUES_TEMPLATE = 'make 1 relative question about {}' \
                 'you must give me the question instead of solution'
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+main = Blueprint('chat', __name__)
 
-@app.route('/data', methods=['POST', 'OPTIONS'])
+
+@main.route('/api/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     if request.method == 'OPTIONS':
-        return app.make_default_options_response()
+        return main.make_default_options_response()
     else:
         data = request.json
         print(data)
@@ -52,10 +49,11 @@ def chatbot():
             def generate():
                 for i in range(2):
                     yield f""
+
             return Response(generate(), mimetype='text/event-stream')
 
 
-@app.route('/source', methods=['GET'])
+@main.route('/api/source', methods=['GET'])
 def get_sources():
     response = {
         'texts': globals()['text_list'],
@@ -79,4 +77,3 @@ def relative_ques(ques):
         data += event.data
     # print(data)
     return data
-

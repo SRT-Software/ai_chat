@@ -73,10 +73,10 @@ def initMilvus():
 
 
 def create_pdf_from_string(content, output_file):
-    pdfmetrics.registerFont(TTFont('雅黑', 'Yahei Mono.ttf'))
+    pdfmetrics.registerFont(TTFont('NotoSansCJK', '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'))
 
     c = canvas.Canvas(output_file, pagesize=letter)
-    c.setFont('雅黑', 12)
+    c.setFont('NotoSansCJK', 12)
     c.drawString(30, 750, content)
     c.save()
 

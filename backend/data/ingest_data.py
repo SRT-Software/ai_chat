@@ -71,10 +71,10 @@ def initMilvus():
 
 def create_pdf_from_string(content, output_file):
     # 创建一个 PDF 画布
-    c = canvas.Canvas(output_file)
+    c = canvas.Canvas(output_file, pagesize="letter")
 
     # 设置字体和字号
-    c.setFont("Helvetica", 12)
+    c.setFont("宋体", 12)
 
     # 将字符串内容写入 PDF
     c.drawString(100, 700, content)

@@ -1,20 +1,7 @@
-import json
-
 import zhipuai
-from ingest_data import initPinecone, initMilvus
-from prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
-from pymilvus import (
-    connections,
-    utility,
-    FieldSchema,
-    CollectionSchema,
-    DataType,
-    Collection,
-)
-import numpy as np
+from data.ingest_data import initPinecone, initMilvus
+from config.prepare import PINECONE_INDEX_NAME
 
-import os
-import ast
 import json
 import subprocess
 def match_query(ques, database="pinecone"):

@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # 指定.env文件的路径
-dotenv_path = '.env'
+dotenv_path = '../.env'
 load_dotenv(dotenv_path)
 
 # 加载环境变量

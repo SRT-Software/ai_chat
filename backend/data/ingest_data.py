@@ -1,12 +1,9 @@
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores.pinecone import Pinecone
-from prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
+from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
 import pinecone
-from langchain.document_loaders import DirectoryLoader, PyPDFLoader
+from langchain.document_loaders import PyPDFLoader
 import zhipuai
 from text_splitter.semantic_segmentation import SemanticTextSplitter
-from text_splitter.pdf_loader import RapidOCRPDFLoader
 from pymilvus import (
     connections,
     utility,
@@ -16,13 +13,13 @@ from pymilvus import (
     Collection,
 )
 import os
-import ast
 import json
 import subprocess
-import asyncio
-from flask import Flask, request, jsonify, Response, abort
+from flask import Flask, request, jsonify
 
-filePath = 'docs'
+from view.main import main
+
+filePath = '../docs'
 zhipuai.api_key = CHATGLM_KEY
 
 milvus_collection_name = "pdf_milvus"
@@ -74,7 +71,7 @@ def initMilvus():
         return pdf_milvus
 
 
-@app.route('/api/upload', methods=['POST'])
+@main.route('/api/upload', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -89,7 +86,7 @@ def upload_file():
 
         # 处理文件上传
         if file:
-            filename = "doc/" + file.filename
+            filename = filePath + '/' + file.filename
             file.save(filename)  # 保存文件到当前工作目录
         ingest(docs=get_single_file_doc(file), database="milvus")
         response = {

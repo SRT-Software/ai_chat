@@ -91,11 +91,10 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 
 
 @file.route('/file/upload', methods=['POST'])
-async def upload_file():
-    async def saveFile(postfile, path):
+def upload_file():
+    def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
-        time.sleep(5)
-        await ingest(docs=get_single_file_doc(path), database="milvus")
+        ingest(docs=get_single_file_doc(path), database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -124,10 +123,9 @@ async def upload_file():
 
 
 @file.route('/file/audio', methods=['POST'])
-async def upload_audio():
-    async def saveFile(audiotext, audiofilepath):
-
-        await ingest(docs=create_audio_docs(audiotext, audiofilepath), database="milvus")
+def upload_audio():
+    def saveFile(audiotext, audiofilepath):
+        ingest(docs=create_audio_docs(audiotext, audiofilepath), database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -189,7 +187,7 @@ def getDocs(model="normal"):
     return docs
 
 
-async def ingest(docs, database="milvus"):
+def ingest(docs, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]

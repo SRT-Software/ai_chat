@@ -1,3 +1,4 @@
+from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
 import pinecone
@@ -17,10 +18,6 @@ import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint
 from datetime import datetime
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 
 filePath = 'docs'
 
@@ -31,6 +28,7 @@ meta_path = "meta_path"
 
 chunk_index = 0
 file = Blueprint('file', __name__)
+
 
 def split_list(long_list, chunk_size):
     return [long_list[i:i + chunk_size] for i in range(0, len(long_list), chunk_size)]
@@ -72,13 +70,22 @@ def initMilvus():
         return pdf_milvus
 
 
-def create_pdf_from_string(content, output_file):
-    pdfmetrics.registerFont(TTFont('NotoSansCJK', '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'))
+def create_audio_docs(audiotext, audiofilepath, model="normal"):
+    rawDocs = []
+    doc = Document
+    doc.page_content = audiotext
+    doc.metadata = {
+        "page": 0,
+        "source": "audio",
+    }
+    rawDocs.append(doc)
 
-    c = canvas.Canvas(output_file, pagesize=letter)
-    c.setFont('NotoSansCJK', 12)
-    c.drawString(30, 750, content)
-    c.save()
+    if model == 'ali':
+        textSplitter = SemanticTextSplitter(pdf=True)
+    else:
+        textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    docs = textSplitter.split_documents(rawDocs)
+    return docs
 
 
 @file.route('/file/upload', methods=['POST'])
@@ -116,7 +123,7 @@ async def upload_file():
 @file.route('/file/audio', methods=['POST'])
 async def upload_audio():
     async def saveFile(audiotext, audiofilepath):
-        create_pdf_from_string(audiotext, audiofilepath)
+        create_audio_docs(audiotext, audiofilepath)
         await ingest(docs=get_single_file_doc(audiofilepath), database="milvus")
 
     if request.method == 'POST':

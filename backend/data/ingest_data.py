@@ -94,7 +94,17 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
-        ingest(docs=get_single_file_doc(path), database="milvus")
+        try:
+            ingest(docs=get_single_file_doc(path), database="milvus")
+        except Exception as e:
+            print(e)
+            # 创建响应对象
+            response = e
+
+            # 修改响应的状态码
+            response.status_code = 201
+
+            return response
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -159,6 +169,8 @@ def get_single_file_doc(path, model="normal"):
     rawDocs = []
     pdfLoader = PyPDFLoader(file_path=path)
     doc = pdfLoader.load()
+    if(doc[0].page_content == ''):
+        raise "page empty"
     print(doc)
     for d in doc:
         rawDocs.append(d)

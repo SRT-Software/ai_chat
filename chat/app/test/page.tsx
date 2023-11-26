@@ -4,39 +4,30 @@ import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import {Avatar, Button} from "@mui/material";
 import axios from "axios";
 import {BASEURL} from "@/app/config/configs";
-export default function Home() {
-    const [value,setValue] = useState("")
-    const fileInputRef = useRef(null);
-    const handleClick = () => {
-        // @ts-ignore
-        fileInputRef.current.click();
-    };
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        // @ts-ignore
+import { MuiFileInput } from 'mui-file-input'
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 
-        const file = event.target.files[0];
-        console.log(file)
-        if(file !== undefined){
-            let formData = new FormData();
-            formData.append('file', file)
-            // 在这里处理选择的文件
-            let r = await axios.post(`${BASEURL}/file/upload`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': 'Bearer test',
-                },
-            })
-            console.log(r)
+export default function Home() {
+    const [value, setValue] = React.useState<File | null>(null)
+
+    const handleChange = (newValue: File | null) => {
+        if(newValue !== null){
+            if(newValue.type === "application/pdf"){
+                setValue(newValue)
+            }
+            return
         }
-    };
+        setValue(newValue)
+    }
+
     return (
         <main>
-            <Tooltip title="Click to Change" arrow>
-                <div>
-                    <Avatar onClick={handleClick}/>
-                    <input type="file" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileChange}/>
-                </div>
-            </Tooltip>
+            
+            <MuiFileInput
+            value={value}
+            onChange={handleChange}
+            hideSizeText
+            />
         </main>
     )
 }

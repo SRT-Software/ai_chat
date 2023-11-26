@@ -12,6 +12,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Alert from '@mui/material/Alert';
 interface PostData {
     question: string
 }
@@ -28,6 +29,7 @@ const Chat: React.FC = () => {
     const [stream, setStream] = useState(false)
     const [textList, setTextList] = useState([])
     const [sourceList, setSourceList] = useState([])
+    const [readytosend, setReadyToSend] = useState(true)
 
     useEffect(() => {
         if (chatInfo.Message !== ''){
@@ -63,6 +65,7 @@ const Chat: React.FC = () => {
                 let result = '';
 
                 const processStream = async () => {
+                    setReadyToSend(false)
                     while (true) {
                         const { done, value } = await reader.read();
 
@@ -83,6 +86,7 @@ const Chat: React.FC = () => {
                                     console.error(error);
                                 });
                             }
+                            setReadyToSend(true)
                             break;
                         }
 
@@ -154,10 +158,10 @@ const Chat: React.FC = () => {
     }, [chatHistory]);
 
     return (
-        <div style={{backgroundColor:"#F5F5F5"}}>
+        <div style={{backgroundColor:"#F5F5F5", width:"100%",height:"100%"}}>
             <Typography variant='h2' fontWeight={"bold"} gutterBottom><center>AI问答</center></Typography>
             <Box sx={{
-                height: '500px',
+                height: '520px',
                 width: '600px',
                 overflow: 'auto',
                 border: '1px solid #ccc',
@@ -182,20 +186,8 @@ const Chat: React.FC = () => {
                         {textAccordions}
                     </AccordionDetails>
                 </Accordion>}
-                {/* <Accordion key={'files'}>
-                <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                    >
-                        <Typography>参考文献</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        {textAccordions}
-                    </AccordionDetails>
-                </Accordion> */}
             </Box>
-            <InputBar />
+            <InputBar readytosend={readytosend} />
         </div>
     );
 };

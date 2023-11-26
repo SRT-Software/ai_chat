@@ -16,7 +16,8 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint
-
+from reportlab.pdfgen import canvas
+from datetime import datetime
 filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
@@ -68,6 +69,20 @@ def initMilvus():
         return pdf_milvus
 
 
+def create_pdf_from_string(content, output_file):
+    # 创建一个 PDF 画布
+    c = canvas.Canvas(output_file)
+
+    # 设置字体和字号
+    c.setFont("Helvetica", 12)
+
+    # 将字符串内容写入 PDF
+    c.drawString(100, 700, content)
+
+    # 保存并关闭 PDF 文件
+    c.save()
+
+
 @file.route('/file/upload', methods=['POST'])
 async def upload_file():
     async def saveFile(filepath):
@@ -94,6 +109,31 @@ async def upload_file():
                 'msg': 'upload successfully'
             }
             return jsonify(response)
+    response = {
+        'msg': 'wrong method'
+    }
+    return jsonify(response)
+
+
+@file.route('/file/audio', methods=['POST'])
+async def upload_file():
+    async def saveFile(audiotext, audiofilepath):
+        create_pdf_from_string(audiotext, audiofilepath)
+        await ingest(docs=get_single_file_doc(audiofilepath), database="milvus")
+
+    if request.method == 'POST':
+        # 检查请求中是否包含文件
+        data = request.json
+        text = data.get('text')
+        current_time = datetime.now()
+        # 创建 PDF 文件
+        filepath = str(filePath + '/' + str(current_time).replace(' ', '-'))
+        print(filepath)
+        await saveFile(text, filepath)
+        response = {
+            'msg': 'upload successfully'
+        }
+        return jsonify(response)
     response = {
         'msg': 'wrong method'
     }

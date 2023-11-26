@@ -46,6 +46,7 @@ export default function InputBar() {
         })
         setValue('')
     }
+    // @ts-ignore
     const handleKeyPress = (e)=>{
         if (e.key === "Enter") {
             handleSend();

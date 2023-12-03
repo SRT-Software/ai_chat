@@ -15,8 +15,9 @@ from pymilvus import (
 import os
 import json
 import subprocess
-from flask import Flask, request, jsonify, Blueprint
-
+from flask import Flask, request, jsonify, Blueprint, make_response
+from mysql_command import upload_data, delete_table, query_data
+from reportlab.pdfgen import canvas
 filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
@@ -55,7 +56,7 @@ def initMilvus():
         vec_dim = 1024
         # metric_type: 向量相似度度量标准, MetricType.IP是向量内积; MetricType.L2是欧式距离
         fields = [
-            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
+            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True),
             FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=vec_dim),
             FieldSchema(name="metadata", dtype=DataType.VARCHAR, max_length=8192)
         ]
@@ -72,7 +73,12 @@ def initMilvus():
 async def upload_file():
     async def saveFile(filepath):
         file.save(filepath)  # 保存文件到当前工作目录
-        await ingest(docs=get_single_file_doc(filepath), database="milvus")
+        try:
+            await ingest(docs=get_single_file_doc(filepath), database="milvus", filename=filepath)
+        except Exception as e:
+            errorResponse = make_response(e)
+            errorResponse.status_code = 401
+            return jsonify(errorResponse)
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -99,6 +105,15 @@ async def upload_file():
     }
     return jsonify(response)
 
+@file.route('/file/audio', methods=['POST'])
+async def upload_audio():
+    async def saveFile(filepath):
+        file.save(filepath)  # 保存文件到当前工作目录
+        await ingest(docs=get_single_file_doc(filepath), database="milvus", filename=filepath)
+
+    if request.method == 'POST':
+        data = request.json
+        text = data.get('text');
 
 def get_files_in_directory(directory_path):
     file_list = []
@@ -122,6 +137,13 @@ def get_single_file_doc(path, model="normal"):
     else:
         textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
     docs = textSplitter.split_documents(rawDocs)
+    isEmpty = True
+    for doc in docs:
+        if doc.page_content != '':
+            isEmpty = False
+
+    if isEmpty:
+        raise "file is empty"
     return docs
 
 
@@ -141,7 +163,7 @@ def getDocs(model="normal"):
     return docs
 
 
-async def ingest(docs, database="milvus"):
+async def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
@@ -196,8 +218,10 @@ async def ingest(docs, database="milvus"):
         # 把向量添加到刚才建立的表格中
         # ids可以为None，使用自动生成的id
         json_list = [json.dumps(item) for item in metadatas]
+        ids = [i + globals()["chunk_index"] for i in range(len(json_list))]
         try:
             entities = [
+                ids,
                 embedding_list,  # field embeddings
                 json_list,  # field metadata
             ]
@@ -215,9 +239,27 @@ async def ingest(docs, database="milvus"):
                 "params": {"nlist": 128},
             }
             milvus.create_index("embeddings", index)
+            print("name: ", filename)
+            upload_data(filename=filename, ids=ids)
             globals()["chunk_index"] += len(embedding_list)
+
         except Exception as e:
             print(e)
+
+# TODO
+def make_expr(filename):
+    ids = query_data(filename)
+    return f'id in {ids}'
+
+@file.route('/file/delete', methods=['POST'])
+def deleteFile():
+    if request.method == 'POST':
+        data = request.json
+        filename = data.get('filename')
+        expr = make_expr(filename)
+        collection = initMilvus()
+        collection.delete(expr)
+        delete_table(filename=filename)
 
 
 if __name__ == '__main__':

@@ -130,6 +130,8 @@ def store_data(table_name, ids):
 
 def filename_to_tablename(filename):
     return filename.replace('/', '').replace('-', '').replace(' ', '').replace('-', '').replace('.', '')
+
+
 def upload_data(filename, ids):
     table_name = filename_to_tablename(filename)
     print(table_name)
@@ -225,6 +227,8 @@ def store_filename(filename):
     emp_no = cursor.lastrowid
     if (cursor.lastrowid == None):
         emp_no = 0
+    else:
+        emp_no += 1
     data_id = {
         'emp_no': emp_no,
         'filename': filename,
@@ -236,6 +240,7 @@ def store_filename(filename):
 
     cursor.close()
     cnx.close()
+
 
 def get_files():
     cnx = connect_to_mysql(config)

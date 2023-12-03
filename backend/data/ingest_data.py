@@ -311,8 +311,10 @@ def deleteFile():
 @file.route('/file/getfiles', methods=['GET'])
 def get_uploaded_files():
     if request.method == 'GET':
+        files = get_files()
+        print(files)
         response = {
-            'filenames': get_files()
+            'filenames': files
         }
         return jsonify(response)
 

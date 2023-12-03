@@ -310,7 +310,7 @@ def deleteFile():
         expr = make_expr(str(filename[0]))
         collection = initMilvus()
         collection.delete(expr)
-        delete_table(filename=filename)
+        delete_table(filename=filename[0])
 
 @file.route('/file/getfiles', methods=['GET'])
 def get_uploaded_files():

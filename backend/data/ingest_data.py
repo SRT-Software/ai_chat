@@ -19,7 +19,7 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint, make_response
-from data.mysql_command import upload_data, delete_table, query_data
+from data.mysql_command import upload_data, delete_table, query_data, store_filename, get_files
 from reportlab.pdfgen import canvas
 from flask import Flask, request, jsonify, Blueprint
 from datetime import datetime
@@ -310,7 +310,13 @@ def deleteFile():
         collection.delete(expr)
         delete_table(filename=filename)
 
-
+@file.route('/file/getfiles', methods=['POST'])
+def get_uploaded_files():
+    if request.method == 'POST':
+        response = {
+            'filenames': get_files()
+        }
+        return jsonify(response)
 
 
 if __name__ == '__main__':

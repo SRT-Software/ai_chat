@@ -235,6 +235,22 @@ def store_filename(filename):
     cursor.close()
     cnx.close()
 
+def get_files():
+    table_name = filename_to_tablename(DEFAULT_NAME)
+    cnx = connect_to_mysql(config)
+    cursor = cnx.cursor()
+
+    query = (f"SELECT id FROM {table_name} ")
+
+    cursor.execute(query)
+    filenames = []
+    for (filename) in cursor:
+        print("filename: ", filename)
+        filenames.append(filename)
+    cursor.close()
+    cnx.close()
+    return filenames
+
 
 if __name__ == '__main__':
     delete_table('test')

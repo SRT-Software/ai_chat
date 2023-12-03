@@ -308,9 +308,9 @@ def deleteFile():
         collection.delete(expr)
         delete_table(filename=filename)
 
-@file.route('/file/getfiles', methods=['POST'])
+@file.route('/file/getfiles', methods=['GET'])
 def get_uploaded_files():
-    if request.method == 'POST':
+    if request.method == 'GET':
         response = {
             'filenames': get_files()
         }

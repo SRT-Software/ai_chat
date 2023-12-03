@@ -279,7 +279,7 @@ def ingest(docs, filename, database="milvus"):
             }
             milvus.create_index("embeddings", index)
             print("name: ", filename)
-            table_name = filename.replace('/', '')
+            table_name = filename_to_tablename(filename)
             upload_data(filename=table_name, ids=ids)
             globals()["chunk_index"] += len(embedding_list)
 
@@ -288,7 +288,7 @@ def ingest(docs, filename, database="milvus"):
 
 # TODO
 def make_expr(filename):
-    ids = query_data(filename)
+    ids = query_data(filename_to_tablename(filename))
     return f'id in {ids}'
 
 @file.route('/file/delete', methods=['POST'])
@@ -300,6 +300,9 @@ def deleteFile():
         collection = initMilvus()
         collection.delete(expr)
         delete_table(filename=filename)
+
+def filename_to_tablename(filename):
+    return filename.replace('/', '').replace('-', '').replace(' ', '')
 
 
 if __name__ == '__main__':

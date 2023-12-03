@@ -31,21 +31,30 @@ const question = ['脚手架的操作规范',
                 '如何防止场内车辆伤害事故',
                 '液氨储罐区的设置要求']
 
-export default function InputBar() {
+interface inputProps{
+    readytosend?:boolean,
+}
+
+export default function InputBar(props:inputProps) {
     const {chatInfo, setChatInfo} = useContext(ChatContext);
     const [value, setValue] = useState('')
+    const [alert,setAlert] = useState(false)
     const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
     };
+    const readytosend = props.readytosend
 
     const handleSend = ()=>{
-        console.log('send ', value)
-        setChatInfo({
-            ...chatInfo,
-            Message: value,
-        })
-        setValue('')
+        if(readytosend){
+            console.log('send ', value)
+            setChatInfo({
+                ...chatInfo,
+                Message: value,
+            })
+            setValue('')
+        }
     }
+    // @ts-ignore
     const handleKeyPress = (e)=>{
         if (e.key === "Enter") {
             handleSend();
@@ -89,6 +98,8 @@ export default function InputBar() {
         recognition.abort()
     }
 
+    
+
     return (
         <Paper
             sx={{
@@ -101,7 +112,7 @@ export default function InputBar() {
             }}
             onKeyDown={handleKeyPress}
         >  
-            <Tooltip title="提示词" arrow>
+            <Tooltip title="提示词" placement="top" arrow>
                 <IconButton sx={{ p: '10px' }} aria-label="menu" onClick={getTips}>
                     <TipsAndUpdatesIcon />
                 </IconButton>
@@ -114,25 +125,25 @@ export default function InputBar() {
                 value={value}
             />
             {(value != null && value != "") ?
-            <Tooltip title="清除" arrow>
+            <Tooltip title="清除" placement="top" arrow>
                 <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={clear}>
                     <ClearIcon />
                 </IconButton>
             </Tooltip>
             :null}
             {speaking
-            ?<Tooltip title="语音" arrow>
+            ?<Tooltip title="停止" placement="top"  arrow>
                 <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={stopSpeaking}>
                 <StopIcon />
                 </IconButton>
             </Tooltip>
-            :<Tooltip title="语音" arrow>
+            :<Tooltip title="语音" placement="top" arrow>
                 <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={startSpeaking}>
                 <KeyboardVoiceIcon />
                 </IconButton>
             </Tooltip>}
-            <Tooltip title="发送" arrow>
-                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSend}>
+            <Tooltip title="发送" placement="top" arrow>
+                <IconButton disabled={!readytosend} type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSend}>
                     <SendIcon />
                 </IconButton>
             </Tooltip>

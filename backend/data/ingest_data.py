@@ -1,3 +1,6 @@
+import time
+
+from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
 import pinecone
@@ -18,6 +21,9 @@ import subprocess
 from flask import Flask, request, jsonify, Blueprint, make_response
 from mysql_command import upload_data, delete_table, query_data
 from reportlab.pdfgen import canvas
+from flask import Flask, request, jsonify, Blueprint
+from datetime import datetime
+
 filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
@@ -69,12 +75,30 @@ def initMilvus():
         return pdf_milvus
 
 
+def create_audio_docs(audiotext, audiofilepath, model="normal"):
+    rawDocs = []
+    doc = Document
+    doc.page_content = audiotext
+    doc.metadata = {
+        "page": 0,
+        "source": str(datetime.now()).replace(' ', '-') + " audio",
+    }
+    rawDocs.append(doc)
+
+    if model == 'ali':
+        textSplitter = SemanticTextSplitter(pdf=True)
+    else:
+        textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    docs = textSplitter.split_documents(rawDocs)
+    return docs
+
+
 @file.route('/file/upload', methods=['POST'])
-async def upload_file():
-    async def saveFile(filepath):
-        file.save(filepath)  # 保存文件到当前工作目录
+def upload_file():
+    def saveFile(postfile, path):
+        postfile.save(path)  # 保存文件到当前工作目录
         try:
-            await ingest(docs=get_single_file_doc(filepath), database="milvus", filename=filepath)
+            ingest(docs=get_single_file_doc(path), filename=path, database="milvus")
         except Exception as e:
             errorResponse = make_response(e)
             errorResponse.status_code = 401
@@ -95,7 +119,7 @@ async def upload_file():
         # 处理文件上传
         if file:
             filepath = str(filePath + '/' + file.filename)
-            await saveFile(filepath)
+            saveFile(file, filepath)
             response = {
                 'msg': 'upload successfully'
             }
@@ -105,15 +129,30 @@ async def upload_file():
     }
     return jsonify(response)
 
+
 @file.route('/file/audio', methods=['POST'])
-async def upload_audio():
-    async def saveFile(filepath):
-        file.save(filepath)  # 保存文件到当前工作目录
-        await ingest(docs=get_single_file_doc(filepath), database="milvus", filename=filepath)
+def upload_audio():
+    def saveFile(audiotext, audiofilepath):
+        ingest(docs=create_audio_docs(audiotext, audiofilepath), filename=audiofilepath, database="milvus")
 
     if request.method == 'POST':
+        # 检查请求中是否包含文件
         data = request.json
-        text = data.get('text');
+        text = data.get('text')
+        current_time = datetime.now()
+        # 创建 PDF 文件
+        filepath = str(filePath + '/' + str(current_time).replace(' ', '-')) + ".pdf"
+
+        saveFile(text, filepath)
+        response = {
+            'msg': 'upload successfully'
+        }
+        return jsonify(response)
+    response = {
+        'msg': 'wrong method'
+    }
+    return jsonify(response)
+
 
 def get_files_in_directory(directory_path):
     file_list = []
@@ -163,12 +202,10 @@ def getDocs(model="normal"):
     return docs
 
 
-async def ingest(docs, filename, database="milvus"):
+def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
-    # print('content', len(content_list))
-    # print()
     # 字符embedding后 1024维向量
     embedding_list = []
     for i in range(len(content_list)):

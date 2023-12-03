@@ -57,6 +57,7 @@ def initMilvus():
             subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
             cmd_command = 'docker-compose up -d'  # 替换为您要执行的实际CMD命令
             subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
+
     if not utility.has_collection(milvus_collection_name):
         # 向量维度
         vec_dim = 1024
@@ -100,6 +101,12 @@ def upload_file():
         try:
             ingest(docs=get_single_file_doc(path), filename=path, database="milvus")
         except Exception as e:
+            errorResponse = {
+                'msg': 'doc is empty',
+                'code': 401,
+            }
+            return jsonify(errorResponse)
+        else:
             errorResponse = {
                 'msg': 'doc is empty',
                 'code': 401,
@@ -199,15 +206,12 @@ def getDocs(model="normal"):
 def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     isEmpty = True
-    print("docs:", len(docs))
     for doc in docs:
         if doc.page_content != '':
             isEmpty = False
 
-    if not docs:
-        raise "file is empty"
-
     if isEmpty or len(docs) == 0:
+        print("docs:", len(docs))
         raise "file is empty"
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]

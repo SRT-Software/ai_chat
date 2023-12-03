@@ -19,7 +19,7 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint, make_response
-from mysql_command import upload_data, delete_table, query_data
+from data.mysql_command import upload_data, delete_table, query_data
 from reportlab.pdfgen import canvas
 from flask import Flask, request, jsonify, Blueprint
 from datetime import datetime

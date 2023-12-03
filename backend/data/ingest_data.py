@@ -18,6 +18,9 @@ from pymilvus import (
 import os
 import json
 import subprocess
+from flask import Flask, request, jsonify, Blueprint, make_response
+from data.mysql_command import upload_data, delete_table, query_data, store_filename, get_files
+from reportlab.pdfgen import canvas
 from flask import Flask, request, jsonify, Blueprint
 from datetime import datetime
 
@@ -54,12 +57,13 @@ def initMilvus():
             subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
             cmd_command = 'docker-compose up -d'  # 替换为您要执行的实际CMD命令
             subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
+
     if not utility.has_collection(milvus_collection_name):
         # 向量维度
         vec_dim = 1024
         # metric_type: 向量相似度度量标准, MetricType.IP是向量内积; MetricType.L2是欧式距离
         fields = [
-            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
+            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True),
             FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=vec_dim),
             FieldSchema(name="metadata", dtype=DataType.VARCHAR, max_length=8192)
         ]
@@ -94,17 +98,12 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
-        try:
-            ingest(docs=get_single_file_doc(path), database="milvus")
-        except Exception as e:
-            print(e)
-            # 创建响应对象
-            response = e
-
-            # 修改响应的状态码
-            response.status_code = 201
-
-            return response
+        docs = get_single_file_doc(path)
+        if len(docs) == 0:
+            error = make_response('file is empty')
+            error.status = 400
+            return error
+        ingest(docs=docs, filename=path, database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -121,11 +120,18 @@ def upload_file():
         # 处理文件上传
         if file:
             filepath = str(filePath + '/' + file.filename)
-            saveFile(file, filepath)
-            response = {
-                'msg': 'upload successfully'
-            }
-            return jsonify(response)
+            try:
+                saveFile(file, filepath)
+                response = {
+                    'msg': 'upload successfully'
+                }
+                return jsonify(response)
+            except Exception as e:
+                errorResponse = {
+                    'msg': 'doc is empty',
+                    'code': 401,
+                }
+                return jsonify(errorResponse)
     response = {
         'msg': 'wrong method'
     }
@@ -135,7 +141,7 @@ def upload_file():
 @file.route('/file/audio', methods=['POST'])
 def upload_audio():
     def saveFile(audiotext, audiofilepath):
-        ingest(docs=create_audio_docs(audiotext, audiofilepath), database="milvus")
+        ingest(docs=create_audio_docs(audiotext, audiofilepath), filename=audiofilepath, database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -169,9 +175,6 @@ def get_single_file_doc(path, model="normal"):
     rawDocs = []
     pdfLoader = PyPDFLoader(file_path=path)
     doc = pdfLoader.load()
-    if(doc[0].page_content == ''):
-        raise "page empty"
-    print(doc)
     for d in doc:
         rawDocs.append(d)
 
@@ -199,12 +202,18 @@ def getDocs(model="normal"):
     return docs
 
 
-def ingest(docs, database="milvus"):
+def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
+    isEmpty = True
+    for doc in docs:
+        if doc.page_content != '':
+            isEmpty = False
+
+    if isEmpty or len(docs) == 0:
+        raise Exception("file is empty")
+
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
-    # print('content', len(content_list))
-    # print()
     # 字符embedding后 1024维向量
     embedding_list = []
     for i in range(len(content_list)):
@@ -254,8 +263,10 @@ def ingest(docs, database="milvus"):
         # 把向量添加到刚才建立的表格中
         # ids可以为None，使用自动生成的id
         json_list = [json.dumps(item) for item in metadatas]
+        ids = [i + globals()["chunk_index"] for i in range(len(json_list))]
         try:
             entities = [
+                ids,
                 embedding_list,  # field embeddings
                 json_list,  # field metadata
             ]
@@ -273,9 +284,44 @@ def ingest(docs, database="milvus"):
                 "params": {"nlist": 128},
             }
             milvus.create_index("embeddings", index)
+            table_name = filename
+            r = upload_data(filename=table_name, ids=ids)
+            if r == None:
+                raise 'Name Error'
             globals()["chunk_index"] += len(embedding_list)
+
         except Exception as e:
             print(e)
+
+# TODO
+def make_expr(filename):
+    matches = query_data(filename)
+    ids = []
+    for match in matches:
+        ids.append(int(match[0]))
+    print(ids)
+    return f'id in {ids}'
+
+@file.route('/file/delete', methods=['POST'])
+def deleteFile():
+    if request.method == 'POST':
+        data = request.json
+        filename = data.get('filename')
+        expr = make_expr(str(filename[0]))
+        collection = initMilvus()
+        collection.delete(expr)
+        delete_table(filename=filename[0])
+        return make_response("delete complete")
+
+@file.route('/file/getfiles', methods=['GET'])
+def get_uploaded_files():
+    if request.method == 'GET':
+        files = get_files()
+        print(files)
+        response = {
+            'filenames': files
+        }
+        return jsonify(response)
 
 
 if __name__ == '__main__':

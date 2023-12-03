@@ -4,6 +4,7 @@ import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import {Avatar, Button} from "@mui/material";
 import axios from "axios";
 import {BASEURL} from "@/app/config/configs";
+import FileCard from "../components/FileCard";
 export default function Home() {
     const [value,setValue] = useState("")
     const fileInputRef = useRef(null);
@@ -23,11 +24,6 @@ export default function Home() {
 
     return (
         <main>
-            <Tooltip title="Click to Change" arrow>
-                <div>
-                    <Avatar onClick={handleClick}/>
-                </div>
-            </Tooltip>
         </main>
     )
 }

@@ -58,7 +58,7 @@ export default function InputBar(props:inputProps) {
     const handleKeyPress = (e)=>{
         if (e.key === "Enter") {
             handleSend();
-          }
+        }
     }
 
     const getTips = ()=>{
@@ -106,10 +106,14 @@ export default function InputBar(props:inputProps) {
                 p: '2px 4px',
                 display: 'flex',
                 alignItems: 'center',
-                width: 620,
+                maxWidth: 620,
                 margin: 'auto',
-                marginTop:'20px',
+                marginTop:'3vh',
+                height:"7vh",
+                border: '1px solid #ccc',
+                borderRadius: '5px',
             }}
+            elevation={0}
             onKeyDown={handleKeyPress}
         >  
             <Tooltip title="提示词" placement="top" arrow>

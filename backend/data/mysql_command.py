@@ -234,7 +234,10 @@ def store_filename(filename):
         emp_no = 0
     else:
         cursor.execute(f"SELECT MAX(emp_no) FROM {DEFAULT_NAME}")
-        emp_no = cursor.fetchone()[0] + 1
+        if(cursor.fetchone()[0] == None):
+            emp_no = 0
+        else:
+            emp_no = cursor.fetchone()[0] + 1
     data_id = {
         'emp_no': emp_no,
         'filename': filename,

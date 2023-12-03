@@ -140,7 +140,7 @@ def upload_data(filename, ids):
     if table_name == DEFAULT_NAME:
         return None
     else:
-        delete_table(table_name)
+        delete_table(filename)
         create_table(table_name)
         store_data(table_name, ids)
         store_filename(filename)

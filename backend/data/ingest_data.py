@@ -99,6 +99,7 @@ def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
         docs = get_single_file_doc(path)
+        print('docs: ', docs)
         if len(docs) == 0:
             error = make_response('file is empty')
             error.status = 400
@@ -210,10 +211,8 @@ def ingest(docs, filename, database="milvus"):
             isEmpty = False
 
     if isEmpty or len(docs) == 0:
-        print("docs:", len(docs))
         raise Exception("file is empty")
 
-    print('correct')
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # 字符embedding后 1024维向量
@@ -287,8 +286,10 @@ def ingest(docs, filename, database="milvus"):
             }
             milvus.create_index("embeddings", index)
             print("name: ", filename)
-            table_name = filename_to_tablename(filename)
-            upload_data(filename=table_name, ids=ids)
+            table_name = filename
+            r = upload_data(filename=table_name, ids=ids)
+            if r == None:
+                raise 'Name Error'
             globals()["chunk_index"] += len(embedding_list)
 
         except Exception as e:
@@ -296,7 +297,7 @@ def ingest(docs, filename, database="milvus"):
 
 # TODO
 def make_expr(filename):
-    ids = query_data(filename_to_tablename(filename))
+    ids = query_data(filename)
     return f'id in {ids}'
 
 @file.route('/file/delete', methods=['POST'])
@@ -309,8 +310,7 @@ def deleteFile():
         collection.delete(expr)
         delete_table(filename=filename)
 
-def filename_to_tablename(filename):
-    return filename.replace('/', '').replace('-', '').replace(' ', '')
+
 
 
 if __name__ == '__main__':

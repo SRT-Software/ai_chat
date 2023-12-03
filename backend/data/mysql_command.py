@@ -2,6 +2,7 @@ import logging
 import time
 import mysql.connector
 from mysql.connector import errorcode
+
 # Set up logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,6 +27,7 @@ config = {
     "password": "password",
 }
 
+DEFAULT_NAME = 'DEFAULT_FILES'
 
 
 def connect_to_mysql(config, attempts=3, delay=2):
@@ -62,12 +64,14 @@ def connect_to_mysql(config, attempts=3, delay=2):
             attempt += 1
     return None
 
+
 def create_database(cursor):
     try:
         cursor.execute(
             "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
     except mysql.connector.Error as err:
         print("Failed creating database: {}".format(err))
+
 
 def create_table(table_name):
     cnx = connect_to_mysql(config)
@@ -96,25 +100,24 @@ def create_table(table_name):
     cursor.close()
     cnx.close()
 
+
 def store_data(table_name, ids):
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
     add_id = (f"INSERT INTO {table_name}"
-                "(emp_no, id) "
-                "VALUES (%(emp_no)s, %(id)s)"
-                "ON DUPLICATE KEY UPDATE "
-                "id = VALUES(id)")
+              "(emp_no, id) "
+              "VALUES (%(emp_no)s, %(id)s)"
+              "ON DUPLICATE KEY UPDATE "
+              "id = VALUES(id)")
 
     emp_no = cursor.lastrowid
     for id in ids:
-        print(emp_no)
-        if(cursor.lastrowid == None):
+        if (cursor.lastrowid == None):
             emp_no = 0
         data_id = {
             'emp_no': emp_no,
             'id': id,
         }
-        print(data_id)
         cursor.execute(add_id, data_id)
         emp_no = emp_no + 1
 
@@ -125,17 +128,26 @@ def store_data(table_name, ids):
     cnx.close()
 
 
+def filename_to_tablename(filename):
+    return filename.replace('/', '').replace('-', '').replace(' ', '')
 def upload_data(filename, ids):
-    delete_table(filename)
-    create_table(filename)
-    store_data(filename, ids)
+    table_name = filename_to_tablename(filename)
+    if table_name == DEFAULT_NAME:
+        return None
+    else:
+        delete_table(table_name)
+        create_table(table_name)
+        store_data(table_name, ids)
+        store_filename(filename)
+        return 'ok'
 
 
 def query_data(filename):
+    table_name = filename_to_tablename(filename)
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 
-    query = (f"SELECT id FROM {filename} ")
+    query = (f"SELECT id FROM {table_name} ")
 
     cursor.execute(query)
     ids = []
@@ -145,6 +157,7 @@ def query_data(filename):
     cursor.close()
     cnx.close()
     return ids
+
 
 def delete_table(filename):
     cnx = connect_to_mysql(config)
@@ -171,13 +184,60 @@ def delete_table(filename):
     cursor.close()
     cnx.close()
 
-def store_filename(filename):
 
-    return ''
+def store_filename(filename):
+    cnx = connect_to_mysql(config)
+    cursor = cnx.cursor()
+    # 查询表是否存在的 SQL 语句
+    show_tables_query = "SHOW TABLES LIKE %s"
+    cursor.execute(show_tables_query, (DEFAULT_NAME,))
+    # 获取查询结果
+    result = cursor.fetchone()
+    if not result:
+        TABLES = {}
+        TABLES[DEFAULT_NAME] = (
+            f"CREATE TABLE `{DEFAULT_NAME}` ("
+            "  `emp_no` int(11) NOT NULL,"
+            "  `filename` VARCHAR(128) NOT NULL,"
+            "  PRIMARY KEY (`emp_no`)"
+            ") ENGINE=InnoDB")
+
+        for table_name in TABLES:
+            table_description = TABLES[table_name]
+            try:
+                print("Creating table {}: ".format(table_name), end='')
+                cursor.execute(table_description)
+            except mysql.connector.Error as err:
+                if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+                    print("already exists.")
+                else:
+                    print(err.msg)
+            else:
+                print("OK")
+
+    add_id = (f"INSERT INTO {DEFAULT_NAME}"
+              "(emp_no, id) "
+              "VALUES (%(emp_no)s, %(filename)s)"
+              "ON DUPLICATE KEY UPDATE "
+              "filename = VALUES(filename)")
+
+    emp_no = cursor.lastrowid
+    if (cursor.lastrowid == None):
+        emp_no = 0
+    data_id = {
+        'emp_no': emp_no,
+        'filename': filename,
+    }
+    cursor.execute(add_id, data_id)
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
+
 
 if __name__ == '__main__':
     delete_table('test')
     upload_data('test', ["111", '222', '333'])
     print(query_data('test'))
     delete_table('test')
-

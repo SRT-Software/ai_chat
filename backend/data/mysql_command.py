@@ -155,7 +155,6 @@ def query_data(filename):
     cursor.execute(query)
     ids = []
     for (id) in cursor:
-        print("id: ", id)
         ids.append(id)
     cursor.close()
     cnx.close()
@@ -167,7 +166,7 @@ def delete_table(filename):
     cursor = cnx.cursor()
     # 查询表是否存在的 SQL 语句
     show_tables_query = "SHOW TABLES LIKE %s"
-    cursor.execute(show_tables_query, (filename,))
+    cursor.execute(show_tables_query, (filename_to_tablename(filename),))
     # 获取查询结果
     result = cursor.fetchone()
 

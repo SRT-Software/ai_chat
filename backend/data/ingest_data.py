@@ -277,7 +277,8 @@ def ingest(docs, filename, database="milvus"):
             }
             milvus.create_index("embeddings", index)
             print("name: ", filename)
-            upload_data(filename=filename, ids=ids)
+            table_name = filename.replace('/', '')
+            upload_data(filename=table_name, ids=ids)
             globals()["chunk_index"] += len(embedding_list)
 
         except Exception as e:

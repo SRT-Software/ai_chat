@@ -98,20 +98,12 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
-        try:
-            ingest(docs=get_single_file_doc(path), filename=path, database="milvus")
-        except Exception as e:
-            errorResponse = {
-                'msg': 'doc is empty',
-                'code': 401,
-            }
-            return jsonify(errorResponse)
-        else:
-            errorResponse = {
-                'msg': 'doc is empty',
-                'code': 401,
-            }
-            return jsonify(errorResponse)
+        docs = get_single_file_doc(path)
+        if len(docs) == 0:
+            error = make_response('file is empty')
+            error.status = 400
+            return error
+        ingest(docs=, filename=path, database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
@@ -128,11 +120,18 @@ def upload_file():
         # 处理文件上传
         if file:
             filepath = str(filePath + '/' + file.filename)
-            saveFile(file, filepath)
-            response = {
-                'msg': 'upload successfully'
-            }
-            return jsonify(response)
+            try:
+                saveFile(file, filepath)
+                response = {
+                    'msg': 'upload successfully'
+                }
+                return jsonify(response)
+            except Exception as e:
+                errorResponse = {
+                    'msg': 'doc is empty',
+                    'code': 401,
+                }
+                return jsonify(errorResponse)
     response = {
         'msg': 'wrong method'
     }

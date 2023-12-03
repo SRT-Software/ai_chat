@@ -172,6 +172,7 @@ def delete_table(filename):
     cnx.close()
 
 def store_filename(filename):
+
     return ''
 
 if __name__ == '__main__':

@@ -311,6 +311,7 @@ def deleteFile():
         collection = initMilvus()
         collection.delete(expr)
         delete_table(filename=filename[0])
+        return make_response("delete down")
 
 @file.route('/file/getfiles', methods=['GET'])
 def get_uploaded_files():

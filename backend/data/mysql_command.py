@@ -105,7 +105,7 @@ def create_table(table_name):
 def store_data(table_name, ids):
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
-    add_id = (f"INSERT INTO {table_name}"
+    add_id = (f"INSERT INTO {table_name} "
               "(emp_no, id) "
               "VALUES (%(emp_no)s, %(id)s)"
               "ON DUPLICATE KEY UPDATE "

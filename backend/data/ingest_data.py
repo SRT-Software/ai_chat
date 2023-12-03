@@ -212,7 +212,9 @@ def ingest(docs, filename, database="milvus"):
 
     if isEmpty or len(docs) == 0:
         print("docs:", len(docs))
-        raise "file is empty"
+        raise Exception("file is empty")
+
+    print('correct')
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # 字符embedding后 1024维向量

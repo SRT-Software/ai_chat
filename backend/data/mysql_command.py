@@ -216,7 +216,7 @@ def store_filename(filename):
                 print("OK")
 
     add_id = (f"INSERT INTO {DEFAULT_NAME}"
-              "(emp_no, id) "
+              "(emp_no, filename) "
               "VALUES (%(emp_no)s, %(filename)s)"
               "ON DUPLICATE KEY UPDATE "
               "filename = VALUES(filename)")
@@ -228,6 +228,7 @@ def store_filename(filename):
         'emp_no': emp_no,
         'filename': filename,
     }
+    print(data_id)
     cursor.execute(add_id, data_id)
     # Make sure data is committed to the database
     cnx.commit()
@@ -236,11 +237,10 @@ def store_filename(filename):
     cnx.close()
 
 def get_files():
-    table_name = filename_to_tablename(DEFAULT_NAME)
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 
-    query = (f"SELECT id FROM {table_name} ")
+    query = (f"SELECT id FROM {DEFAULT_NAME} ")
 
     cursor.execute(query)
     filenames = []

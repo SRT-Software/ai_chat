@@ -132,6 +132,7 @@ def filename_to_tablename(filename):
     return filename.replace('/', '').replace('-', '').replace(' ', '')
 def upload_data(filename, ids):
     table_name = filename_to_tablename(filename)
+    print(table_name)
     if table_name == DEFAULT_NAME:
         return None
     else:

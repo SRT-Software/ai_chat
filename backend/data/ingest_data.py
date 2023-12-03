@@ -99,7 +99,6 @@ def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
         docs = get_single_file_doc(path)
-        print('docs: ', docs)
         if len(docs) == 0:
             error = make_response('file is empty')
             error.status = 400
@@ -285,7 +284,6 @@ def ingest(docs, filename, database="milvus"):
                 "params": {"nlist": 128},
             }
             milvus.create_index("embeddings", index)
-            print("name: ", filename)
             table_name = filename
             r = upload_data(filename=table_name, ids=ids)
             if r == None:

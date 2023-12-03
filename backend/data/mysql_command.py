@@ -171,7 +171,8 @@ def delete_table(filename):
     cursor.close()
     cnx.close()
 
-def
+def store_filename(filename):
+    return ''
 
 if __name__ == '__main__':
     delete_table('test')

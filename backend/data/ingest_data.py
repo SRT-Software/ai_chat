@@ -199,6 +199,7 @@ def getDocs(model="normal"):
 def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     isEmpty = True
+    print("docs:", docs)
     for doc in docs:
         print('doc content: ', doc.page_content)
         if doc.page_content != '':

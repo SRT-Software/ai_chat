@@ -100,8 +100,10 @@ def upload_file():
         try:
             ingest(docs=get_single_file_doc(path), filename=path, database="milvus")
         except Exception as e:
-            errorResponse = make_response("File is empty")
-            errorResponse.status_code = 401
+            errorResponse = {
+                'msg': 'doc is empty',
+                'code': 401,
+            }
             return jsonify(errorResponse)
 
     if request.method == 'POST':

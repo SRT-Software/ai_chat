@@ -295,7 +295,11 @@ def ingest(docs, filename, database="milvus"):
 
 # TODO
 def make_expr(filename):
-    ids = query_data(filename)
+    matches = query_data(filename)
+    ids = []
+    for match in matches:
+        ids.append(match[0])
+    print(ids)
     return f'id in {ids}'
 
 @file.route('/file/delete', methods=['POST'])
@@ -303,7 +307,6 @@ def deleteFile():
     if request.method == 'POST':
         data = request.json
         filename = data.get('filename')
-        print("delete filename: ", filename[0])
         expr = make_expr(str(filename[0]))
         collection = initMilvus()
         collection.delete(expr)

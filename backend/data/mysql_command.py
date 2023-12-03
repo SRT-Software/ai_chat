@@ -251,7 +251,6 @@ def get_files():
     cursor.execute(query)
     filenames = []
     for (filename) in cursor:
-        print("filename: ", filename)
         filenames.append(filename)
     cursor.close()
     cnx.close()

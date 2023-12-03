@@ -303,7 +303,8 @@ def deleteFile():
     if request.method == 'POST':
         data = request.json
         filename = data.get('filename')
-        expr = make_expr(filename)
+        print("delete filename: ", filename)
+        expr = make_expr(str(filename))
         collection = initMilvus()
         collection.delete(expr)
         delete_table(filename=filename)

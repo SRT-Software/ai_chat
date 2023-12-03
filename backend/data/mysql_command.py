@@ -126,6 +126,7 @@ def store_data(table_name, ids):
 
 
 def upload_data(filename, ids):
+    delete_table(filename)
     create_table(filename)
     store_data(filename, ids)
 

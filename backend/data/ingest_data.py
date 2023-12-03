@@ -177,14 +177,6 @@ def get_single_file_doc(path, model="normal"):
     else:
         textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
     docs = textSplitter.split_documents(rawDocs)
-    isEmpty = True
-    for doc in docs:
-        print('doc content: ', doc.page_content)
-        if doc.page_content != '':
-            isEmpty = False
-
-    if isEmpty:
-        raise "file is empty"
     return docs
 
 
@@ -206,6 +198,14 @@ def getDocs(model="normal"):
 
 def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
+    isEmpty = True
+    for doc in docs:
+        print('doc content: ', doc.page_content)
+        if doc.page_content != '':
+            isEmpty = False
+
+    if isEmpty or len(docs) == 0:
+        raise "file is empty"
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # 字符embedding后 1024维向量

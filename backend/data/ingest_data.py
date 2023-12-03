@@ -199,11 +199,13 @@ def getDocs(model="normal"):
 def ingest(docs, filename, database="milvus"):
     zhipuai.api_key = CHATGLM_KEY
     isEmpty = True
-    print("docs:", docs)
+    print("docs:", len(docs))
     for doc in docs:
-        print('doc content: ', doc.page_content)
         if doc.page_content != '':
             isEmpty = False
+
+    if not docs:
+        raise "file is empty"
 
     if isEmpty or len(docs) == 0:
         raise "file is empty"

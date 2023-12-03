@@ -171,6 +171,8 @@ def delete_table(filename):
     cursor.close()
     cnx.close()
 
+def
+
 if __name__ == '__main__':
     delete_table('test')
     upload_data('test', ["111", '222', '333'])

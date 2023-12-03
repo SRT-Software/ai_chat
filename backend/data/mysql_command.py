@@ -229,11 +229,12 @@ def store_filename(filename):
               "ON DUPLICATE KEY UPDATE "
               "filename = VALUES(filename)")
 
-    emp_no = cursor.lastrowid
+    emp_no = 0
     if (cursor.lastrowid == None):
         emp_no = 0
     else:
-        emp_no += 1
+        cursor.execute(f"SELECT MAX(emp_no) FROM {DEFAULT_NAME}")
+        emp_no = cursor.fetchone()[0] + 1
     data_id = {
         'emp_no': emp_no,
         'filename': filename,

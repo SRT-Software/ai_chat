@@ -241,7 +241,7 @@ def get_files():
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 
-    query = (f"SELECT id FROM {DEFAULT_NAME} ")
+    query = (f"SELECT filename FROM {DEFAULT_NAME} ")
 
     cursor.execute(query)
     filenames = []

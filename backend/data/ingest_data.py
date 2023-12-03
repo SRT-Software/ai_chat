@@ -298,7 +298,7 @@ def make_expr(filename):
     matches = query_data(filename)
     ids = []
     for match in matches:
-        ids.append(match[0])
+        ids.append(int(match[0]))
     print(ids)
     return f'id in {ids}'
 

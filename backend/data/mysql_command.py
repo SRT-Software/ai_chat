@@ -181,6 +181,8 @@ def delete_table(filename):
     else:
         print("表不存在")
 
+    delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
+    cursor.execute(delete_sql, (filename,))
     # 提交事务
     cnx.commit()
 

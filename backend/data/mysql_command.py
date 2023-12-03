@@ -129,7 +129,7 @@ def store_data(table_name, ids):
 
 
 def filename_to_tablename(filename):
-    return filename.replace('/', '').replace('-', '').replace(' ', '')
+    return filename.replace('/', '').replace('-', '').replace(' ', '').replace('-', '').replace('.', '')
 def upload_data(filename, ids):
     table_name = filename_to_tablename(filename)
     print(table_name)

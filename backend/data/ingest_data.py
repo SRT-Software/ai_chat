@@ -103,7 +103,7 @@ def upload_file():
             error = make_response('file is empty')
             error.status = 400
             return error
-        ingest(docs=, filename=path, database="milvus")
+        ingest(docs=docs, filename=path, database="milvus")
 
     if request.method == 'POST':
         # 检查请求中是否包含文件

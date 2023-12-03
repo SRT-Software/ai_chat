@@ -166,14 +166,16 @@ def delete_table(filename):
     cursor = cnx.cursor()
     # 查询表是否存在的 SQL 语句
     show_tables_query = "SHOW TABLES LIKE %s"
-    cursor.execute(show_tables_query, (filename_to_tablename(filename),))
+    table_name = filename_to_tablename(filename)
+    print("table: ", table_name)
+    cursor.execute(show_tables_query, (table_name,))
     # 获取查询结果
     result = cursor.fetchone()
 
     # 检查表是否存在
     if result:
         # 删除表的 SQL 语句
-        drop_table_query = f"DROP TABLE {filename}"
+        drop_table_query = f"DROP TABLE {table_name}"
         # 执行删除表的 SQL 语句
         cursor.execute(drop_table_query)
     else:

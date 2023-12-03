@@ -22,8 +22,8 @@ USER_NAME = 'user'
 
 config = {
     "host": "localhost",
-    "user": "root",
-    "password": "SrtProject2023",
+    "user": "new_user",
+    "password": "password",
 }
 
 

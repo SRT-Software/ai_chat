@@ -169,7 +169,6 @@ def get_single_file_doc(path, model="normal"):
     rawDocs = []
     pdfLoader = PyPDFLoader(file_path=path)
     doc = pdfLoader.load()
-    print(doc)
     for d in doc:
         rawDocs.append(d)
 
@@ -180,6 +179,7 @@ def get_single_file_doc(path, model="normal"):
     docs = textSplitter.split_documents(rawDocs)
     isEmpty = True
     for doc in docs:
+        print('doc content: ', doc.page_content)
         if doc.page_content != '':
             isEmpty = False
 

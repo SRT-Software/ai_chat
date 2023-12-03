@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import time
 import mysql.connector
@@ -129,7 +130,8 @@ def store_data(table_name, ids):
 
 
 def filename_to_tablename(filename):
-    return filename.replace('/', '').replace('-', '').replace(' ', '').replace('-', '').replace('.', '')
+    hash_obj = hashlib.sha1(filename.encode())
+    return hash_obj.hexdigest()[:10]
 
 
 def upload_data(filename, ids):

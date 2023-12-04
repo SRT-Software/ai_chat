@@ -242,7 +242,7 @@ def store_filename(filename):
     if (cursor.lastrowid == None):
         emp_no = 0
     else:
-        cursor.execute(f"SELECT MAX(emp_no) FROM {DEFAULT_NAME}")
+        cursor.execute(f"SELECT MAX(`emp_no`) FROM {DEFAULT_NAME}")
         if(cursor.fetchone()[0] == None):
             emp_no = 0
         else:

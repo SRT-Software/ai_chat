@@ -183,20 +183,20 @@ def delete_table(filename):
         drop_table_query = f"DROP TABLE {table_name}"
         # 执行删除表的 SQL 语句
         cursor.execute(drop_table_query)
+        print("delete filename")
+        # 查询特定值是否存在
+        query = f"SELECT * FROM {table_name} WHERE filename = %s"
+        value = (filename,)
+        cursor.execute(query, value)
+
+        # 检查查询结果
+        if cursor.fetchone():
+            # 如果存在，执行删除操作
+            delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
+            cursor.execute(delete_sql, (filename,))
     else:
         print("表不存在")
 
-    print("delete filename")
-    # 查询特定值是否存在
-    query = f"SELECT * FROM {table_name} WHERE filename = %s"
-    value = (filename,)
-    cursor.execute(query, value)
-
-    # 检查查询结果
-    if cursor.fetchone():
-        # 如果存在，执行删除操作
-        delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
-        cursor.execute(delete_sql, (filename,))
     # 提交事务
     cnx.commit()
 

@@ -243,7 +243,18 @@ def store_filename(filename):
     if (cursor.lastrowid == None):
         emp_no = 0
     else:
-        emp_no = cursor.lastrowid + 1
+        # 定义查询最大emp_no的SQL语句
+        query = f"SELECT MAX(emp_no) FROM `{DEFAULT_NAME}`"
+
+        # 执行查询
+        cursor.execute(query)
+        # 获取查询结果
+        result = cursor.fetchone()
+
+        # 提取最大emp_no值
+        max_emp_no = result[0]
+        print(max_emp_no)
+        emp_no = max_emp_no + 1
     data_id = {
         'emp_no': emp_no,
         'filename': filename,

@@ -12,6 +12,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import bgimg from '../static/bg.jpg'
 import Alert from '@mui/material/Alert';
 interface PostData {
     question: string
@@ -46,7 +47,6 @@ const Chat: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log(chatInfo.Message)
                 const response = await fetch(`${BASEURL}/api/data`, {
                     method: 'POST',
                     headers: {
@@ -158,11 +158,11 @@ const Chat: React.FC = () => {
     }, [chatHistory]);
 
     return (
-        <div style={{backgroundColor:"#F5F5F5", width:"100%",height:"100%"}}>
-            <Typography variant='h2' fontWeight={"bold"} gutterBottom><center>AI问答</center></Typography>
+        <div style={{ width:"100%",height:"100%",backgroundImage:`url()`}}>
+            <Typography variant='h2' fontWeight={"bold"} sx={{height:"10vh"}} gutterBottom><center>AI问答</center></Typography>
             <Box sx={{
-                height: '520px',
-                width: '600px',
+                height: '70vh',
+                maxWidth: '600px',
                 overflow: 'auto',
                 border: '1px solid #ccc',
                 borderRadius: '5px',

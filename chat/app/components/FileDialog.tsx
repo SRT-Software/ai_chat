@@ -1,17 +1,16 @@
 'use client'
 import exp from "constants";
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
-import axios from "axios";
+import axios,{AxiosResponse} from "axios";
 import {BASEURL} from "@/app/config/configs";
 import { MuiFileInput } from 'mui-file-input'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar, Alert, TextField, Tooltip, IconButton } from "@mui/material";
 import BackupIcon from '@mui/icons-material/Backup';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import FolderIcon from '@mui/icons-material/Folder';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import FileCard from "./FileCard";
 
-const actions = [
-    { icon: <BackupIcon color="primary"/>, name: '上传文件' },
-    {icon:< KeyboardVoiceIcon color="primary"/>,name:"语音上传"}
-  ];
 
 export default function FileDialog(){
     const [file, setFile] = React.useState<File | null>(null)
@@ -31,52 +30,74 @@ export default function FileDialog(){
 
     const [openfile,setOpenFile] = useState(false)
     const [openvoice,setOpenVoice] = useState(false)
+    const [openfilelist,setOpenFileList] = useState(false)
     const [opensuccess,setOpenSuccess] = useState(false)
     const [openfail,setOpenfail] = useState(false)
     
+    const actions = [
+        { icon: <BackupIcon color="primary"/>, name: '上传文件', action: ()=>{setOpenFile(true)}},
+        {icon:< KeyboardVoiceIcon color="primary"/>,name:"语音上传",action:()=>{setOpenVoice(true)}},
+        {icon:<ListAltIcon color='primary'/>,name:"文件列表",action:()=>{setOpenFileList(true)}}
+      ];
+
     async function handleFileOk() {
-        if(file === null || file === undefined){
-            setFileNull(true)
-        }else{
-            setOpenFile(false)
-            console.log(file)
-            let formData = new FormData();
-            formData.append('file', file)
-            let r = await axios.post(`${BASEURL}/file/upload`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': 'Bearer test',
-                },
-            })
-            if(r.status == 200){
-                setOpenSuccess(true)
+        try{
+            if(file === null || file === undefined){
+                setFileNull(true)
             }else{
-                setOpenfail(true)
+                setOpenFile(false)
+                console.log(file)
+                let formData = new FormData();
+                formData.append('file', file)
+                let r = await axios.post(`${BASEURL}/file/upload`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': 'Bearer test',
+                    },
+                })
+                if(r.status == 200){
+                    setOpenSuccess(true)
+                    getFileList()
+                }else{
+                    setOpenfail(true)
+                }
+                console.log(r)
             }
-            console.log(r)
+        }catch(e){
+            console.error(e)
         }
     }
 
     async function handleVoiceOk(){
-        if(text === null || text === "" || text === undefined){
-            setVoiceNull(true)
-        }else{
-            setOpenVoice(false)
-            let r = await axios.post(`${BASEURL}/file/audio`, {
-                "text": text
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer test',
-                },
-            })
-            if(r.status == 200){
-                setVoiceSuccess(true)
+        try{
+            if(text === null || text === "" || text === undefined){
+                setVoiceNull(true)
             }else{
-                setVoiceFail(true)
+                setOpenVoice(false)
+                let r = await axios.post(`${BASEURL}/file/audio`, {
+                    "text": text
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test',
+                    },
+                })
+                if(r.status == 200){
+                    setVoiceSuccess(true)
+                    getFileList()
+                }else{
+                    setVoiceFail(true)
+                }
+                console.log(r)
             }
-            console.log(r)
+        }catch(e){
+            console.error(e)
         }
+        
+    }
+
+    const handleFileListOK = ()=>{
+        setOpenFileList(false)
     }
 
     const [fileerror,setFileError] = useState(false)
@@ -84,7 +105,6 @@ export default function FileDialog(){
     const [voicenull,setVoiceNull] = useState(false)
     const [voicesuccess,setVoiceSuccess] = useState(false)
     const [voicefail,setVoiceFail] = useState(false)
-
     const [text,setText] = useState("")
     const [speaking, setSpeaking] = useState(false)
     var recognition = new webkitSpeechRecognition();
@@ -108,12 +128,34 @@ export default function FileDialog(){
         recognition.start()
     }
 
+    const [filelist, setFileList] = useState(<Box/>)
+
+    const getFileList = async()=>{
+        const response = await axios.get(`${BASEURL}/file/getfiles`,{
+            headers:{
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer test',
+            }
+        })
+        console.log(response.data)
+        const newlist = response.data.filenames.map((filename:string,index:number)=>{
+            return(
+                <FileCard key={index} filename={filename} refresh={getFileList}/>
+            )
+        })
+        setFileList(<Box>{newlist}</Box>)
+    }
+
+    useEffect(()=>{
+        getFileList()
+    },[])
+
     return (
         <Box>
         <SpeedDial
             ariaLabel="SpeedDial basic example"
-            sx={{ position: 'absolute', bottom: 80, right: 300 }}
-            icon={<SpeedDialIcon />}
+            sx={{ position: 'absolute', bottom: "15vh", right:'10%' }}
+            icon={<FolderIcon /> }
             FabProps={{
                 size: 'large',
             }}
@@ -123,7 +165,7 @@ export default function FileDialog(){
                 key={action.name}
                 icon={action.icon}
                 tooltipTitle={action.name}
-                onClick={action.name === "上传文件"?()=>setOpenFile(true):()=>setOpenVoice(true)}
+                onClick={action.action}
             />
             ))}
         </SpeedDial>
@@ -174,25 +216,36 @@ export default function FileDialog(){
                 </Tooltip>
                 </Box>
             </Dialog>}
-            <Snackbar open={fileerror} onClose={()=>setFileError(false)}>
+            {openfilelist && 
+            <Dialog sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }} open={openfilelist}>
+                <DialogTitle>已上传文件</DialogTitle>
+                <DialogContent>
+                    {filelist}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleFileListOK}>确定</Button>
+                </DialogActions>
+            </Dialog>
+            }
+            <Snackbar open={fileerror} onClose={()=>setFileError(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="warning">只能上传pdf文件</Alert>
             </Snackbar>
-            <Snackbar open={filenull} onClose={()=>setFileNull(false)}>
+            <Snackbar open={filenull} onClose={()=>setFileNull(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="warning">请先选择文件</Alert>
             </Snackbar>
-            <Snackbar open={opensuccess} onClose={()=>setOpenSuccess(false)}>
+            <Snackbar open={opensuccess} onClose={()=>setOpenSuccess(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="success">文件上传完毕</Alert>
             </Snackbar>
-            <Snackbar open={openfail} onClose={()=>setOpenfail(false)}>
+            <Snackbar open={openfail} onClose={()=>setOpenfail(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="error">文件上传失败</Alert>
             </Snackbar>
-            <Snackbar open={voicenull} onClose={()=>setVoiceNull(false)}>
+            <Snackbar open={voicenull} onClose={()=>setVoiceNull(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="warning">请先输入内容</Alert>
             </Snackbar>
-            <Snackbar open={voicesuccess} onClose={()=>setVoiceSuccess(false)}>
+            <Snackbar open={voicesuccess} onClose={()=>setVoiceSuccess(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="success">条目上传完毕</Alert>
             </Snackbar>
-            <Snackbar open={voicefail} onClose={()=>setVoiceFail(false)}>
+            <Snackbar open={voicefail} onClose={()=>setVoiceFail(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="error">条目上传失败</Alert>
             </Snackbar>
         </Box>

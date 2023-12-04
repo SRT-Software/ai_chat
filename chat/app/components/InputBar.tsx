@@ -58,7 +58,7 @@ export default function InputBar(props:inputProps) {
     const handleKeyPress = (e)=>{
         if (e.key === "Enter") {
             handleSend();
-          }
+        }
     }
 
     const getTips = ()=>{
@@ -73,21 +73,26 @@ export default function InputBar(props:inputProps) {
 
 
     const [speaking, setSpeaking] = useState(false)
-    var recognition = new webkitSpeechRecognition();
-    recognition.onaudioend = function(event){
-        setSpeaking(false)
-        recognition.stop()
-    }
-    recognition.interimResults = true;
-    recognition.lang = "zh"
-    recognition.onresult = function(event) {
-        var result = event.results[event.results.length - 1][0].transcript;
-        console.log("result:")
-        console.log(result)
-        setValue(result)
-    };
-    recognition.onerror = function(event){
-        console.log(event)
+    try{
+        var recognition = new webkitSpeechRecognition();
+        recognition.onaudioend = function(event){
+            setSpeaking(false)
+            recognition.stop()
+        }
+        recognition.interimResults = true;
+        recognition.lang = "zh"
+        recognition.onresult = function(event) {
+            var result = event.results[event.results.length - 1][0].transcript;
+            console.log("result:")
+            console.log(result)
+            setValue(result)
+        };
+        recognition.onerror = function(event){
+            console.log(event)
+        }
+        
+    }catch(e){
+        console.error(e)
     }
     const startSpeaking=()=>{
         setSpeaking(true)
@@ -97,7 +102,6 @@ export default function InputBar(props:inputProps) {
         setSpeaking(false)
         recognition.abort()
     }
-
     
 
     return (
@@ -106,10 +110,14 @@ export default function InputBar(props:inputProps) {
                 p: '2px 4px',
                 display: 'flex',
                 alignItems: 'center',
-                width: 620,
+                maxWidth: 620,
                 margin: 'auto',
-                marginTop:'20px',
+                marginTop:'3vh',
+                height:"7vh",
+                border: '1px solid #ccc',
+                borderRadius: '5px',
             }}
+            elevation={0}
             onKeyDown={handleKeyPress}
         >  
             <Tooltip title="提示词" placement="top" arrow>

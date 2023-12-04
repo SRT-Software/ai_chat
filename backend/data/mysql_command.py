@@ -136,10 +136,11 @@ def filename_to_tablename(filename):
 
 def upload_data(filename, ids):
     table_name = filename_to_tablename(filename)
-    print(table_name)
+    print("table name: " ,table_name)
     if table_name == DEFAULT_NAME:
         return None
     else:
+        print('delete')
         delete_table(filename)
         print("create")
         create_table(table_name)
@@ -172,7 +173,6 @@ def delete_table(filename):
     # 查询表是否存在的 SQL 语句
     show_tables_query = "SHOW TABLES LIKE %s"
     table_name = filename_to_tablename(filename)
-    print("table: ", table_name)
     cursor.execute(show_tables_query, (table_name,))
     # 获取查询结果
     result = cursor.fetchone()
@@ -186,8 +186,16 @@ def delete_table(filename):
     else:
         print("表不存在")
 
-    delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
-    cursor.execute(delete_sql, (filename,))
+    # 查询特定值是否存在
+    query = f"SELECT * FROM {table_name} WHERE filename = %s"
+    value = (filename,)
+    cursor.execute(query, value)
+
+    # 检查查询结果
+    if cursor.fetchone():
+        # 如果存在，执行删除操作
+        delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
+        cursor.execute(delete_sql, (filename,))
     # 提交事务
     cnx.commit()
 

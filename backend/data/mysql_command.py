@@ -183,7 +183,7 @@ def delete_table(filename):
         cursor.execute(drop_table_query)
         print("delete filename")
         # 查询特定值是否存在
-        query = f"SELECT * FROM {table_name} WHERE filename = %s"
+        query = f"SELECT * FROM {DEFAULT_NAME} WHERE filename = %s"
         value = (filename,)
         cursor.execute(query, value)
 

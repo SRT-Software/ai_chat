@@ -107,9 +107,7 @@ def store_data(table_name, ids):
     cursor = cnx.cursor()
     add_id = (f"INSERT INTO {table_name} "
               "(emp_no, id) "
-              "VALUES (%(emp_no)s, %(id)s)"
-              "ON DUPLICATE KEY UPDATE "
-              "id = VALUES(id)")
+              "VALUES (%(emp_no)s, %(id)s)")
 
     emp_no = cursor.lastrowid
     for id in ids:
@@ -237,9 +235,7 @@ def store_filename(filename):
 
     add_id = (f"INSERT INTO {DEFAULT_NAME}"
               "(emp_no, filename) "
-              "VALUES (%(emp_no)s, %(filename)s)"
-              "ON DUPLICATE KEY UPDATE "
-              "filename = VALUES(filename)")
+              "VALUES (%(emp_no)s, %(filename)s)")
 
     emp_no = 0
     if (cursor.lastrowid == None):
@@ -267,15 +263,22 @@ def get_files():
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 
-    query = (f"SELECT filename FROM {DEFAULT_NAME} ")
+    show_tables_query = "SHOW TABLES LIKE %s"
+    cursor.execute(show_tables_query, (DEFAULT_NAME,))
+    # 获取查询结果
+    result = cursor.fetchone()
+    if result:
+        query = (f"SELECT filename FROM {DEFAULT_NAME} ")
 
-    cursor.execute(query)
-    filenames = []
-    for (filename) in cursor:
-        filenames.append(filename)
-    cursor.close()
-    cnx.close()
-    return filenames
+        cursor.execute(query)
+        filenames = []
+        for (filename) in cursor:
+            filenames.append(filename)
+        cursor.close()
+        cnx.close()
+        return filenames
+    else:
+        return []
 
 
 if __name__ == '__main__':

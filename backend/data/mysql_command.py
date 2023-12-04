@@ -143,10 +143,10 @@ def upload_data(filename, ids):
         delete_table(filename)
         print("create")
         create_table(table_name)
-        print("store")
-        store_data(table_name, ids)
         print("store filename")
         store_filename(filename)
+        print("store data")
+        store_data(table_name, ids)
         return 'ok'
 
 

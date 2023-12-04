@@ -186,6 +186,7 @@ def delete_table(filename):
     else:
         print("表不存在")
 
+    print("delete filename")
     # 查询特定值是否存在
     query = f"SELECT * FROM {table_name} WHERE filename = %s"
     value = (filename,)

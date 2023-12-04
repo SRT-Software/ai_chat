@@ -117,6 +117,7 @@ def store_data(table_name, ids):
             'emp_no': emp_no,
             'id': id,
         }
+
         cursor.execute(add_id, data_id)
         emp_no = emp_no + 1
 
@@ -129,7 +130,7 @@ def store_data(table_name, ids):
 
 def filename_to_tablename(filename):
     hash_obj = hashlib.sha1(filename.encode())
-    return hash_obj.hexdigest()[:10]
+    return hash_obj.hexdigest()[:15]
 
 
 def upload_data(filename, ids):

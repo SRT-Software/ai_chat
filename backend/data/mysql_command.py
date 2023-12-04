@@ -239,14 +239,11 @@ def store_filename(filename):
               "VALUES (%(emp_no)s, %(filename)s)")
 
     emp_no = 0
+    print("cursor.lastrowid: ", cursor.lastrowid)
     if (cursor.lastrowid == None):
         emp_no = 0
     else:
-        cursor.execute(f"SELECT MAX(`emp_no`) FROM {DEFAULT_NAME}")
-        if(cursor.fetchone()[0] == None):
-            emp_no = 0
-        else:
-            emp_no = cursor.fetchone()[0] + 1
+        emp_no = cursor.lastrowid + 1
     data_id = {
         'emp_no': emp_no,
         'filename': filename,

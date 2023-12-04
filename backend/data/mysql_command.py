@@ -179,19 +179,19 @@ def delete_table(filename):
     # 检查表是否存在
     if result:
         # 删除表的 SQL 语句
-        drop_table_query = f"DROP TABLE {table_name}"
+        drop_table_query = f"DROP TABLE `{table_name}`"
         # 执行删除表的 SQL 语句
         cursor.execute(drop_table_query)
         print("delete filename")
         # 查询特定值是否存在
-        query = f"SELECT * FROM {DEFAULT_NAME} WHERE filename = %s"
+        query = f"SELECT * FROM `{DEFAULT_NAME}` WHERE filename = %s"
         value = (filename,)
         cursor.execute(query, value)
 
         # 检查查询结果
         if cursor.fetchone():
             # 如果存在，执行删除操作
-            delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
+            delete_sql = f"DELETE FROM `{DEFAULT_NAME}` WHERE filename = %s"
             cursor.execute(delete_sql, (filename,))
     else:
         print("表不存在")
@@ -234,7 +234,7 @@ def store_filename(filename):
             else:
                 print("OK")
 
-    add_id = (f"INSERT INTO {DEFAULT_NAME}"
+    add_id = (f"INSERT INTO `{DEFAULT_NAME}` "
               "(emp_no, filename) "
               "VALUES (%(emp_no)s, %(filename)s)")
 

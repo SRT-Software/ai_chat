@@ -141,8 +141,11 @@ def upload_data(filename, ids):
         return None
     else:
         delete_table(filename)
+        print("create")
         create_table(table_name)
+        print("store")
         store_data(table_name, ids)
+        print("store filename")
         store_filename(filename)
         return 'ok'
 

@@ -107,25 +107,25 @@ export default function FileDialog(){
     const [voicefail,setVoiceFail] = useState(false)
     const [text,setText] = useState("")
     const [speaking, setSpeaking] = useState(false)
-    var recognition = new webkitSpeechRecognition();
-    recognition.onaudioend = function(event){
-        setSpeaking(false)
-        recognition.stop()
-    }
-    recognition.interimResults = true;
-    recognition.lang = "zh"
-    recognition.onresult = function(event) {
-        var result = event.results[event.results.length - 1][0].transcript;
-        let newtext = text
-        newtext = `${newtext}${result}`
-        setText(newtext)
-    };
-    recognition.onerror = function(event){
-        console.log(event)
-    }
+    // var recognition = new webkitSpeechRecognition();
+    // recognition.onaudioend = function(event){
+    //     setSpeaking(false)
+    //     recognition.stop()
+    // }
+    // recognition.interimResults = true;
+    // recognition.lang = "zh"
+    // recognition.onresult = function(event) {
+    //     var result = event.results[event.results.length - 1][0].transcript;
+    //     let newtext = text
+    //     newtext = `${newtext}${result}`
+    //     setText(newtext)
+    // };
+    // recognition.onerror = function(event){
+    //     console.log(event)
+    // }
     const startSpeaking=()=>{
         setSpeaking(true)
-        recognition.start()
+        // recognition.start()
     }
 
     const [filelist, setFileList] = useState(<Box/>)

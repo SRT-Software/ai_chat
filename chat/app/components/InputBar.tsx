@@ -1,4 +1,5 @@
 'use client'
+import "regenerator-runtime/runtime";
 import * as React from 'react';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
@@ -81,43 +82,44 @@ export default function InputBar(props:inputProps) {
 
 
     const [speaking, setSpeaking] = useState(false)
-    try{
-        var recognition = new webkitSpeechRecognition();
-        recognition.onaudioend = function(event){
-            setSpeaking(false)
-            recognition.stop()
-        }
-        recognition.interimResults = true;
-        recognition.lang = "zh"
-        recognition.onresult = function(event) {
-            var result = event.results[event.results.length - 1][0].transcript;
-            console.log("result:")
-            console.log(result)
-            setValue(result)
-        };
-        recognition.onerror = function(event){
-            console.log(event)
-        }
-        
-    }catch(e){
-        console.error(e)
-    }
-    const startSpeaking=()=>{
-        setSpeaking(true)
-        // SpeechRecognition.startListening()
-        // setValue(transcript)
-    }
-    const stopSpeaking=()=>{
-        setSpeaking(false)
-        // SpeechRecognition.stopListening()
+    const {
+        transcript,
+        listening,
+        resetTranscript,
+        browserSupportsSpeechRecognition
+    } = useSpeechRecognition();
+    const [oldvalue, setOldValue] = useState("")
+    if (!browserSupportsSpeechRecognition) {
+        console.log("not support")
     }
 
-    if (typeof webkitSpeechRecognition !== 'undefined') {
-        // 在这里使用 webkitSpeechRecognition 对象
-        console.log(typeof webkitSpeechRecognition)
-    } else {
-    // 处理不支持语音识别的情况
-    console.log("No")
+    useEffect(() => {
+        if(speaking)
+            setValue(`${oldvalue}${transcript}`)
+    }, [transcript]);
+
+    useEffect(() => {
+        setOldValue(value)
+    }, [speaking]);
+
+    useEffect(()=>{
+        if(!speaking){
+            setOldValue(value)
+        }
+    },[value])
+
+
+    const startListenning = async () =>{
+        resetTranscript();
+        setSpeaking(true)
+        await SpeechRecognition.startListening({continuous:true, language: 'zh-CN' })
+        console.log("start")
+    }
+
+    const endListenning = async () =>{
+        setSpeaking(false)
+        await SpeechRecognition.stopListening()
+        console.log("end")
     }
 
     return (
@@ -157,12 +159,12 @@ export default function InputBar(props:inputProps) {
             :null}
             {speaking
             ?<Tooltip title="停止" placement="top"  arrow>
-                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={stopSpeaking}>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={endListenning}>
                 <StopIcon />
                 </IconButton>
             </Tooltip>
             :<Tooltip title="语音" placement="top" arrow>
-                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={startSpeaking}>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={startListenning}>
                 <KeyboardVoiceIcon />
                 </IconButton>
             </Tooltip>}

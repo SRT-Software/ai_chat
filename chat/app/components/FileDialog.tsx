@@ -1,4 +1,5 @@
 'use client'
+import "regenerator-runtime/runtime";
 import exp from "constants";
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import axios,{AxiosResponse} from "axios";
@@ -7,9 +8,11 @@ import { MuiFileInput } from 'mui-file-input'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar, Alert, TextField, Tooltip, IconButton } from "@mui/material";
 import BackupIcon from '@mui/icons-material/Backup';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import StopIcon from '@mui/icons-material/Stop';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import FileCard from "./FileCard";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 
 export default function FileDialog(){
@@ -107,25 +110,46 @@ export default function FileDialog(){
     const [voicefail,setVoiceFail] = useState(false)
     const [text,setText] = useState("")
     const [speaking, setSpeaking] = useState(false)
-    // var recognition = new webkitSpeechRecognition();
-    // recognition.onaudioend = function(event){
-    //     setSpeaking(false)
-    //     recognition.stop()
-    // }
-    // recognition.interimResults = true;
-    // recognition.lang = "zh"
-    // recognition.onresult = function(event) {
-    //     var result = event.results[event.results.length - 1][0].transcript;
-    //     let newtext = text
-    //     newtext = `${newtext}${result}`
-    //     setText(newtext)
-    // };
-    // recognition.onerror = function(event){
-    //     console.log(event)
-    // }
-    const startSpeaking=()=>{
+    const {
+        transcript,
+        listening,
+        resetTranscript,
+        browserSupportsSpeechRecognition
+    } = useSpeechRecognition();
+
+    const [oldtext,setOldText] = useState("")
+
+    if (!browserSupportsSpeechRecognition) {
+        console.log("not support")
+    }
+
+    useEffect(()=>{
+        if(speaking)
+            setText(`${oldtext}${transcript}`)
+    },[transcript])
+
+    useEffect(() => {
+        setOldText(text)
+    }, [speaking]);
+
+    useEffect(()=>{
+        if(!speaking){
+            setOldText(text)
+        }
+    },[text])
+
+    const startListenning = async () =>{
+        resetTranscript()
+        await SpeechRecognition.startListening({continuous:true, language: 'zh-CN' })
         setSpeaking(true)
-        // recognition.start()
+        console.log("start")
+    }
+
+    const endListenning = async () =>{
+        resetTranscript()
+        setSpeaking(false)
+        await SpeechRecognition.stopListening()
+        console.log("end")
     }
 
     const [filelist, setFileList] = useState(<Box/>)
@@ -199,7 +223,7 @@ export default function FileDialog(){
             <Dialog sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }} open={openvoice}>
                 <DialogTitle>输入条目</DialogTitle>
                 <DialogContent>
-                    <TextField multiline sx={{width:"100%",maxHeight:"200px",overflow:"auto"}} value={text} onChange={(e)=>setText(e.target.value)}/>
+                    <TextField multiline sx={{width:"100%",maxHeight:"200px",overflow:"auto"}} value={text} onChange={(e)=>{setText(e.target.value)}}/>
                     
                 </DialogContent>
                 <DialogActions>
@@ -210,8 +234,10 @@ export default function FileDialog(){
                 </DialogActions>
                 <Box sx={{display:"block",position:"absolute",bottom:"5%",left:"5%"}}>
                 <Tooltip title="语音输入" placement="top" arrow>
-                    <IconButton type="button" aria-label="search" onClick={startSpeaking}>
-                        <KeyboardVoiceIcon  color={speaking?'primary':'inherit'}/>
+                    <IconButton type="button" aria-label="search" onClick={speaking?endListenning:startListenning}>
+                        {speaking
+                        ?<StopIcon  />
+                        :<KeyboardVoiceIcon  />}
                     </IconButton>
                 </Tooltip>
                 </Box>

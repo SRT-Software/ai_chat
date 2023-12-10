@@ -5,7 +5,7 @@ import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import axios,{AxiosResponse} from "axios";
 import {BASEURL} from "@/app/config/configs";
 import { MuiFileInput } from 'mui-file-input'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar, Alert, TextField, Tooltip, IconButton } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar, Alert, TextField, Tooltip, IconButton, LinearProgress } from "@mui/material";
 import BackupIcon from '@mui/icons-material/Backup';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import StopIcon from '@mui/icons-material/Stop';
@@ -49,6 +49,7 @@ export default function FileDialog(){
                 setFileNull(true)
             }else{
                 setOpenFile(false)
+                setOpenProcess(true)
                 console.log(file)
                 let formData = new FormData();
                 formData.append('file', file)
@@ -60,9 +61,11 @@ export default function FileDialog(){
                 })
                 if(r.status == 200){
                     setOpenSuccess(true)
+                    setOpenProcess(false)
                     getFileList()
                 }else{
                     setOpenfail(true)
+                    setOpenProcess(false)
                 }
                 console.log(r)
             }
@@ -77,6 +80,7 @@ export default function FileDialog(){
                 setVoiceNull(true)
             }else{
                 setOpenVoice(false)
+                setOpenProcess(true)
                 let r = await axios.post(`${BASEURL}/file/audio`, {
                     "text": text
                 }, {
@@ -87,8 +91,10 @@ export default function FileDialog(){
                 })
                 if(r.status == 200){
                     setVoiceSuccess(true)
+                    setOpenProcess(false)
                     getFileList()
                 }else{
+                    setOpenProcess(false)
                     setVoiceFail(true)
                 }
                 console.log(r)
@@ -173,6 +179,8 @@ export default function FileDialog(){
     useEffect(()=>{
         getFileList()
     },[])
+
+    const [openProcess, setOpenProcess] = useState(false)
 
     return (
         <Box>
@@ -273,6 +281,9 @@ export default function FileDialog(){
             </Snackbar>
             <Snackbar open={voicefail} onClose={()=>setVoiceFail(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="error">条目上传失败</Alert>
+            </Snackbar>
+            <Snackbar open={openProcess} onClose={()=>setOpenProcess(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                <Alert severity="info">文件上传中<LinearProgress /></Alert>
             </Snackbar>
         </Box>
     )

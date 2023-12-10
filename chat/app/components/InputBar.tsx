@@ -13,7 +13,8 @@ import ClearIcon from '@mui/icons-material/Clear';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import StopIcon from '@mui/icons-material/Stop';
 import Tooltip from '@mui/material/Tooltip'
-
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import {Alert, Snackbar} from "@mui/material";
 const question = ['脚手架的操作规范', 
                 '矿井内氧气含量过低怎么办', 
                 '遭遇恶劣天气应该如何处理',
@@ -40,11 +41,17 @@ export default function InputBar(props:inputProps) {
     const {chatInfo, setChatInfo} = useContext(ChatContext);
     const [value, setValue] = useState('')
     const [alert,setAlert] = useState(false)
+    const [audioError, setAudioError] = useState(false)
     const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
     };
     const readytosend = props.readytosend
-
+    // const {
+    //     transcript,
+    //     listening,
+    //     resetTranscript,
+    //     browserSupportsSpeechRecognition
+    // } = useSpeechRecognition();
     const handleSend = ()=>{
         if(readytosend){
             console.log('send ', value)
@@ -74,29 +81,35 @@ export default function InputBar(props:inputProps) {
 
 
     const [speaking, setSpeaking] = useState(false)
-    var recognition = new webkitSpeechRecognition();
-    recognition.onaudioend = function(event){
-        setSpeaking(false)
-        recognition.stop()
-    }
-    recognition.interimResults = true;
-    recognition.lang = "zh"
-    recognition.onresult = function(event) {
-        var result = event.results[event.results.length - 1][0].transcript;
-        console.log("result:")
-        console.log(result)
-        setValue(result)
-    };
-    recognition.onerror = function(event){
-        console.log(event)
+    try{
+        var recognition = new webkitSpeechRecognition();
+        recognition.onaudioend = function(event){
+            setSpeaking(false)
+            recognition.stop()
+        }
+        recognition.interimResults = true;
+        recognition.lang = "zh"
+        recognition.onresult = function(event) {
+            var result = event.results[event.results.length - 1][0].transcript;
+            console.log("result:")
+            console.log(result)
+            setValue(result)
+        };
+        recognition.onerror = function(event){
+            console.log(event)
+        }
+        
+    }catch(e){
+        console.error(e)
     }
     const startSpeaking=()=>{
         setSpeaking(true)
-        recognition.start()
+        // SpeechRecognition.startListening()
+        // setValue(transcript)
     }
     const stopSpeaking=()=>{
         setSpeaking(false)
-        recognition.abort()
+        // SpeechRecognition.stopListening()
     }
 
     if (typeof webkitSpeechRecognition !== 'undefined') {
@@ -159,6 +172,9 @@ export default function InputBar(props:inputProps) {
                 </IconButton>
             </Tooltip>
             <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+            <Snackbar open={audioError} onClose={()=>setAudioError(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                <Alert severity="warning">只能上传pdf文件</Alert>
+            </Snackbar>
         </Paper>
     );
 }

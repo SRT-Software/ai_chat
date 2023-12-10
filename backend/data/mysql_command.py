@@ -105,11 +105,9 @@ def create_table(table_name):
 def store_data(table_name, ids):
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
-    add_id = (f"INSERT INTO {table_name} "
+    add_id = (f"INSERT INTO `{table_name}` "
               "(emp_no, id) "
-              "VALUES (%(emp_no)s, %(id)s)"
-              "ON DUPLICATE KEY UPDATE "
-              "id = VALUES(id)")
+              "VALUES (%(emp_no)s, %(id)s)")
 
     emp_no = cursor.lastrowid
     for id in ids:
@@ -119,6 +117,7 @@ def store_data(table_name, ids):
             'emp_no': emp_no,
             'id': id,
         }
+
         cursor.execute(add_id, data_id)
         emp_no = emp_no + 1
 
@@ -131,19 +130,23 @@ def store_data(table_name, ids):
 
 def filename_to_tablename(filename):
     hash_obj = hashlib.sha1(filename.encode())
-    return hash_obj.hexdigest()[:10]
+    return hash_obj.hexdigest()[:15]
 
 
 def upload_data(filename, ids):
     table_name = filename_to_tablename(filename)
-    print(table_name)
+    print("table name: " ,table_name)
     if table_name == DEFAULT_NAME:
         return None
     else:
+        print('delete')
         delete_table(filename)
+        print("create")
         create_table(table_name)
-        store_data(table_name, ids)
+        print("store filename")
         store_filename(filename)
+        print("store data")
+        store_data(table_name, ids)
         return 'ok'
 
 
@@ -169,7 +172,6 @@ def delete_table(filename):
     # 查询表是否存在的 SQL 语句
     show_tables_query = "SHOW TABLES LIKE %s"
     table_name = filename_to_tablename(filename)
-    print("table: ", table_name)
     cursor.execute(show_tables_query, (table_name,))
     # 获取查询结果
     result = cursor.fetchone()
@@ -177,14 +179,23 @@ def delete_table(filename):
     # 检查表是否存在
     if result:
         # 删除表的 SQL 语句
-        drop_table_query = f"DROP TABLE {table_name}"
+        drop_table_query = f"DROP TABLE `{table_name}`"
         # 执行删除表的 SQL 语句
         cursor.execute(drop_table_query)
+        print("delete filename")
+        # 查询特定值是否存在
+        query = f"SELECT * FROM `{DEFAULT_NAME}` WHERE filename = %s"
+        value = (filename,)
+        cursor.execute(query, value)
+
+        # 检查查询结果
+        if cursor.fetchone():
+            # 如果存在，执行删除操作
+            delete_sql = f"DELETE FROM `{DEFAULT_NAME}` WHERE filename = %s"
+            cursor.execute(delete_sql, (filename,))
     else:
         print("表不存在")
 
-    delete_sql = f"DELETE FROM {DEFAULT_NAME} WHERE filename = %s"
-    cursor.execute(delete_sql, (filename,))
     # 提交事务
     cnx.commit()
 
@@ -223,21 +234,24 @@ def store_filename(filename):
             else:
                 print("OK")
 
-    add_id = (f"INSERT INTO {DEFAULT_NAME}"
+    add_id = (f"INSERT INTO `{DEFAULT_NAME}` "
               "(emp_no, filename) "
-              "VALUES (%(emp_no)s, %(filename)s)"
-              "ON DUPLICATE KEY UPDATE "
-              "filename = VALUES(filename)")
+              "VALUES (%(emp_no)s, %(filename)s)")
 
     emp_no = 0
-    if (cursor.lastrowid == None):
+    # 定义查询最大emp_no的SQL语句
+    query = f"SELECT MAX(emp_no) FROM `{DEFAULT_NAME}`"
+    # 执行查询
+    cursor.execute(query)
+    # 获取查询结果
+    result = cursor.fetchone()
+    # 提取最大emp_no值
+    max_emp_no = result[0]
+    print(max_emp_no)
+    if (max_emp_no == None):
         emp_no = 0
     else:
-        cursor.execute(f"SELECT MAX(emp_no) FROM {DEFAULT_NAME}")
-        if(cursor.fetchone()[0] == None):
-            emp_no = 0
-        else:
-            emp_no = cursor.fetchone()[0] + 1
+        emp_no = max_emp_no + 1
     data_id = {
         'emp_no': emp_no,
         'filename': filename,
@@ -255,15 +269,22 @@ def get_files():
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 
-    query = (f"SELECT filename FROM {DEFAULT_NAME} ")
+    show_tables_query = "SHOW TABLES LIKE %s"
+    cursor.execute(show_tables_query, (DEFAULT_NAME,))
+    # 获取查询结果
+    result = cursor.fetchone()
+    if result:
+        query = (f"SELECT filename FROM {DEFAULT_NAME} ")
 
-    cursor.execute(query)
-    filenames = []
-    for (filename) in cursor:
-        filenames.append(filename)
-    cursor.close()
-    cnx.close()
-    return filenames
+        cursor.execute(query)
+        filenames = []
+        for (filename) in cursor:
+            filenames.append(filename)
+        cursor.close()
+        cnx.close()
+        return filenames
+    else:
+        return []
 
 
 if __name__ == '__main__':

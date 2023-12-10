@@ -1,3 +1,4 @@
+'use client'
 import * as React from 'react';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
@@ -73,26 +74,21 @@ export default function InputBar(props:inputProps) {
 
 
     const [speaking, setSpeaking] = useState(false)
-    try{
-        var recognition = new webkitSpeechRecognition();
-        recognition.onaudioend = function(event){
-            setSpeaking(false)
-            recognition.stop()
-        }
-        recognition.interimResults = true;
-        recognition.lang = "zh"
-        recognition.onresult = function(event) {
-            var result = event.results[event.results.length - 1][0].transcript;
-            console.log("result:")
-            console.log(result)
-            setValue(result)
-        };
-        recognition.onerror = function(event){
-            console.log(event)
-        }
-        
-    }catch(e){
-        console.error(e)
+    var recognition = new webkitSpeechRecognition();
+    recognition.onaudioend = function(event){
+        setSpeaking(false)
+        recognition.stop()
+    }
+    recognition.interimResults = true;
+    recognition.lang = "zh"
+    recognition.onresult = function(event) {
+        var result = event.results[event.results.length - 1][0].transcript;
+        console.log("result:")
+        console.log(result)
+        setValue(result)
+    };
+    recognition.onerror = function(event){
+        console.log(event)
     }
     const startSpeaking=()=>{
         setSpeaking(true)
@@ -102,7 +98,14 @@ export default function InputBar(props:inputProps) {
         setSpeaking(false)
         recognition.abort()
     }
-    
+
+    if (typeof webkitSpeechRecognition !== 'undefined') {
+        // 在这里使用 webkitSpeechRecognition 对象
+        console.log(typeof webkitSpeechRecognition)
+    } else {
+    // 处理不支持语音识别的情况
+    console.log("No")
+    }
 
     return (
         <Paper

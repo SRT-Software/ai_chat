@@ -1,3 +1,5 @@
+'use client'
+import "regenerator-runtime/runtime";
 import * as React from 'react';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
@@ -12,7 +14,8 @@ import ClearIcon from '@mui/icons-material/Clear';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import StopIcon from '@mui/icons-material/Stop';
 import Tooltip from '@mui/material/Tooltip'
-
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import {Alert, Snackbar} from "@mui/material";
 const question = ['脚手架的操作规范', 
                 '矿井内氧气含量过低怎么办', 
                 '遭遇恶劣天气应该如何处理',
@@ -39,11 +42,17 @@ export default function InputBar(props:inputProps) {
     const {chatInfo, setChatInfo} = useContext(ChatContext);
     const [value, setValue] = useState('')
     const [alert,setAlert] = useState(false)
+    const [audioError, setAudioError] = useState(false)
     const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
     };
     const readytosend = props.readytosend
-
+    // const {
+    //     transcript,
+    //     listening,
+    //     resetTranscript,
+    //     browserSupportsSpeechRecognition
+    // } = useSpeechRecognition();
     const handleSend = ()=>{
         if(readytosend){
             console.log('send ', value)
@@ -73,36 +82,45 @@ export default function InputBar(props:inputProps) {
 
 
     const [speaking, setSpeaking] = useState(false)
-    try{
-        var recognition = new webkitSpeechRecognition();
-        recognition.onaudioend = function(event){
-            setSpeaking(false)
-            recognition.stop()
-        }
-        recognition.interimResults = true;
-        recognition.lang = "zh"
-        recognition.onresult = function(event) {
-            var result = event.results[event.results.length - 1][0].transcript;
-            console.log("result:")
-            console.log(result)
-            setValue(result)
-        };
-        recognition.onerror = function(event){
-            console.log(event)
-        }
-        
-    }catch(e){
-        console.error(e)
+    const {
+        transcript,
+        listening,
+        resetTranscript,
+        browserSupportsSpeechRecognition
+    } = useSpeechRecognition();
+    const [oldvalue, setOldValue] = useState("")
+    if (!browserSupportsSpeechRecognition) {
+        console.log("not support")
     }
-    const startSpeaking=()=>{
+
+    useEffect(() => {
+        if(speaking)
+            setValue(`${oldvalue}${transcript}`)
+    }, [transcript]);
+
+    useEffect(() => {
+        setOldValue(value)
+    }, [speaking]);
+
+    useEffect(()=>{
+        if(!speaking){
+            setOldValue(value)
+        }
+    },[value])
+
+
+    const startListenning = async () =>{
+        resetTranscript();
         setSpeaking(true)
-        recognition.start()
+        await SpeechRecognition.startListening({continuous:true, language: 'zh-CN' })
+        console.log("start")
     }
-    const stopSpeaking=()=>{
+
+    const endListenning = async () =>{
         setSpeaking(false)
-        recognition.abort()
+        await SpeechRecognition.stopListening()
+        console.log("end")
     }
-    
 
     return (
         <Paper
@@ -141,12 +159,12 @@ export default function InputBar(props:inputProps) {
             :null}
             {speaking
             ?<Tooltip title="停止" placement="top"  arrow>
-                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={stopSpeaking}>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={endListenning}>
                 <StopIcon />
                 </IconButton>
             </Tooltip>
             :<Tooltip title="语音" placement="top" arrow>
-                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={startSpeaking}>
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={startListenning}>
                 <KeyboardVoiceIcon />
                 </IconButton>
             </Tooltip>}
@@ -156,6 +174,9 @@ export default function InputBar(props:inputProps) {
                 </IconButton>
             </Tooltip>
             <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+            <Snackbar open={audioError} onClose={()=>setAudioError(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                <Alert severity="warning">只能上传pdf文件</Alert>
+            </Snackbar>
         </Paper>
     );
 }

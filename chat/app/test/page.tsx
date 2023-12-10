@@ -1,12 +1,9 @@
 'use client'
+import "regenerator-runtime/runtime";
 import Tooltip from "@mui/material/Tooltip";
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
-import {Avatar, Button} from "@mui/material";
-import axios from "axios";
-import {BASEURL} from "@/app/config/configs";
-import FileCard from "../components/FileCard";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
-import "regenerator-runtime/runtime";
+
 export default function Home() {
     const {
         transcript,
@@ -16,15 +13,34 @@ export default function Home() {
     } = useSpeechRecognition();
 
     if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
+        console.log("not support")
     }
+
+    useEffect(() => {
+        console.log(transcript)
+    }, [transcript]);
+
+    const startListenning = async () =>{
+        await SpeechRecognition.startListening({ language: 'zh-CN' })
+        console.log("start")
+    }
+
+    const endListenning = async () =>{
+        await SpeechRecognition.stopListening()
+        console.log("end")
+    }
+
+
     return (
         <main>
             <div>
             <p>Microphone: {listening ? 'on' : 'off'}</p>
-                <button onClick={()=>SpeechRecognition.startListening}>Start</button>
-                <button onClick={()=>SpeechRecognition.stopListening}>Stop</button>
-                <button onClick={()=>resetTranscript}>Reset</button>
+                <button onClick={startListenning}>Start</button>
+                <button onClick={endListenning}>Stop</button>
+                <button onClick={()=>{
+                    resetTranscript()
+                    console.log("reset")
+                }}>Reset</button>
             <p>{transcript}</p>
             </div>
         </main>

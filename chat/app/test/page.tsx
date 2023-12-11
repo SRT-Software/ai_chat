@@ -1,32 +1,21 @@
 'use client'
+import "regenerator-runtime/runtime";
 import Tooltip from "@mui/material/Tooltip";
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
-import {Avatar, Button} from "@mui/material";
-import axios from "axios";
-import {BASEURL} from "@/app/config/configs";
-import FileCard from "../components/FileCard";
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
-import "regenerator-runtime/runtime";
-export default function Home() {
-    const {
-        transcript,
-        listening,
-        resetTranscript,
-        browserSupportsSpeechRecognition
-    } = useSpeechRecognition();
+import { Alert, CircularProgress, LinearProgress, Snackbar } from "@mui/material";
 
-    if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
-    }
+export default function Home() {
+    
+
+
     return (
         <main>
-            <div>
-            <p>Microphone: {listening ? 'on' : 'off'}</p>
-                <button onClick={()=>SpeechRecognition.startListening}>Start</button>
-                <button onClick={()=>SpeechRecognition.stopListening}>Stop</button>
-                <button onClick={()=>resetTranscript}>Reset</button>
-            <p>{transcript}</p>
-            </div>
+            <Snackbar open={true}  anchorOrigin={{ vertical: 'top', horizontal: 'left' }} >
+                <Alert severity="info">wenjfjdskfd<LinearProgress /></Alert>
+            </Snackbar>
+            {/* <Snackbar open={true} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                <Alert severity="success">文件上传完毕</Alert>
+            </Snackbar> */}
         </main>
     )
 }

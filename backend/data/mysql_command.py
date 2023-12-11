@@ -155,7 +155,7 @@ def query_data(filename):
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 
-    query = (f"SELECT id FROM {table_name} ")
+    query = (f"SELECT id FROM `{table_name}` ")
 
     cursor.execute(query)
     ids = []
@@ -274,7 +274,7 @@ def get_files():
     # 获取查询结果
     result = cursor.fetchone()
     if result:
-        query = (f"SELECT filename FROM {DEFAULT_NAME} ")
+        query = (f"SELECT filename FROM `{DEFAULT_NAME}` ")
 
         cursor.execute(query)
         filenames = []

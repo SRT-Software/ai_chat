@@ -1,16 +1,18 @@
 'use client'
+import "regenerator-runtime/runtime";
 import exp from "constants";
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import axios,{AxiosResponse} from "axios";
 import {BASEURL} from "@/app/config/configs";
 import { MuiFileInput } from 'mui-file-input'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar, Alert, TextField, Tooltip, IconButton } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar, Alert, TextField, Tooltip, IconButton, LinearProgress } from "@mui/material";
 import BackupIcon from '@mui/icons-material/Backup';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import StopIcon from '@mui/icons-material/Stop';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import FileCard from "./FileCard";
-import {useSpeechRecognition} from "react-speech-recognition";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 
 export default function FileDialog(){
@@ -47,6 +49,7 @@ export default function FileDialog(){
                 setFileNull(true)
             }else{
                 setOpenFile(false)
+                setOpenProcess(true)
                 console.log(file)
                 let formData = new FormData();
                 formData.append('file', file)
@@ -58,9 +61,11 @@ export default function FileDialog(){
                 })
                 if(r.status == 200){
                     setOpenSuccess(true)
+                    setOpenProcess(false)
                     getFileList()
                 }else{
                     setOpenfail(true)
+                    setOpenProcess(false)
                 }
                 console.log(r)
             }
@@ -75,6 +80,7 @@ export default function FileDialog(){
                 setVoiceNull(true)
             }else{
                 setOpenVoice(false)
+                setOpenProcess(true)
                 let r = await axios.post(`${BASEURL}/file/audio`, {
                     "text": text
                 }, {
@@ -85,8 +91,10 @@ export default function FileDialog(){
                 })
                 if(r.status == 200){
                     setVoiceSuccess(true)
+                    setOpenProcess(false)
                     getFileList()
                 }else{
+                    setOpenProcess(false)
                     setVoiceFail(true)
                 }
                 console.log(r)
@@ -96,6 +104,7 @@ export default function FileDialog(){
         }
         
     }
+
     const handleFileListOK = ()=>{
         setOpenFileList(false)
     }
@@ -111,24 +120,43 @@ export default function FileDialog(){
         transcript,
         listening,
         resetTranscript,
-        browserSupportsSpeechRecognition,
+        browserSupportsSpeechRecognition
     } = useSpeechRecognition();
-    const startListening=()=>{
-        if (listening) {
-            stopSpeechRecognition();
-        } else {
-            startSpeechRecognition();
-        }
+
+    const [oldtext,setOldText] = useState("")
+
+    if (!browserSupportsSpeechRecognition) {
+        console.log("not support")
     }
 
-    const startSpeechRecognition = () => {
-        resetTranscript();
-        setSpeaking(true);
-    };
+    useEffect(()=>{
+        if(speaking)
+            setText(`${oldtext}${transcript}`)
+    },[transcript])
 
-    const stopSpeechRecognition = () => {
-        setSpeaking(false);
-    };
+    useEffect(() => {
+        setOldText(text)
+    }, [speaking]);
+
+    useEffect(()=>{
+        if(!speaking){
+            setOldText(text)
+        }
+    },[text])
+
+    const startListenning = async () =>{
+        resetTranscript()
+        await SpeechRecognition.startListening({continuous:true, language: 'zh-CN' })
+        setSpeaking(true)
+        console.log("start")
+    }
+
+    const endListenning = async () =>{
+        resetTranscript()
+        setSpeaking(false)
+        await SpeechRecognition.stopListening()
+        console.log("end")
+    }
 
     const [filelist, setFileList] = useState(<Box/>)
 
@@ -150,10 +178,9 @@ export default function FileDialog(){
 
     useEffect(()=>{
         getFileList()
-        if (browserSupportsSpeechRecognition) {
-            console.log('Speech recognition supported');
-        }
     },[])
+
+    const [openProcess, setOpenProcess] = useState(false)
 
     return (
         <Box>
@@ -204,7 +231,8 @@ export default function FileDialog(){
             <Dialog sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }} open={openvoice}>
                 <DialogTitle>输入条目</DialogTitle>
                 <DialogContent>
-                    <TextField multiline sx={{width:"100%",maxHeight:"200px",overflow:"auto"}} value={text} onChange={(e)=>setText(e.target.value)}/>
+                    <TextField multiline sx={{width:"100%",maxHeight:"200px",overflow:"auto"}} value={text} onChange={(e)=>{setText(e.target.value)}}/>
+                    
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={()=>setOpenVoice(false)}>
@@ -214,8 +242,10 @@ export default function FileDialog(){
                 </DialogActions>
                 <Box sx={{display:"block",position:"absolute",bottom:"5%",left:"5%"}}>
                 <Tooltip title="语音输入" placement="top" arrow>
-                    <IconButton type="button" aria-label="search" onClick={startListening}>
-                        <KeyboardVoiceIcon  color={speaking?'primary':'inherit'}/>
+                    <IconButton type="button" aria-label="search" onClick={speaking?endListenning:startListenning}>
+                        {speaking
+                        ?<StopIcon  />
+                        :<KeyboardVoiceIcon  />}
                     </IconButton>
                 </Tooltip>
                 </Box>
@@ -251,6 +281,9 @@ export default function FileDialog(){
             </Snackbar>
             <Snackbar open={voicefail} onClose={()=>setVoiceFail(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
                 <Alert severity="error">条目上传失败</Alert>
+            </Snackbar>
+            <Snackbar open={openProcess} onClose={()=>setOpenProcess(false)} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                <Alert severity="info">文件上传中<LinearProgress /></Alert>
             </Snackbar>
         </Box>
     )

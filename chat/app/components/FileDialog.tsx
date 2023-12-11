@@ -10,6 +10,7 @@ import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import FileCard from "./FileCard";
+import {useSpeechRecognition} from "react-speech-recognition";
 
 
 export default function FileDialog(){
@@ -95,7 +96,6 @@ export default function FileDialog(){
         }
         
     }
-
     const handleFileListOK = ()=>{
         setOpenFileList(false)
     }
@@ -107,26 +107,28 @@ export default function FileDialog(){
     const [voicefail,setVoiceFail] = useState(false)
     const [text,setText] = useState("")
     const [speaking, setSpeaking] = useState(false)
-    var recognition = new webkitSpeechRecognition();
-    recognition.onaudioend = function(event){
-        setSpeaking(false)
-        recognition.stop()
+    const {
+        transcript,
+        listening,
+        resetTranscript,
+        browserSupportsSpeechRecognition,
+    } = useSpeechRecognition();
+    const startListening=()=>{
+        if (listening) {
+            stopSpeechRecognition();
+        } else {
+            startSpeechRecognition();
+        }
     }
-    recognition.interimResults = true;
-    recognition.lang = "zh"
-    recognition.onresult = function(event) {
-        var result = event.results[event.results.length - 1][0].transcript;
-        let newtext = text
-        newtext = `${newtext}${result}`
-        setText(newtext)
+
+    const startSpeechRecognition = () => {
+        resetTranscript();
+        setSpeaking(true);
     };
-    recognition.onerror = function(event){
-        console.log(event)
-    }
-    const startSpeaking=()=>{
-        setSpeaking(true)
-        recognition.start()
-    }
+
+    const stopSpeechRecognition = () => {
+        setSpeaking(false);
+    };
 
     const [filelist, setFileList] = useState(<Box/>)
 
@@ -148,6 +150,9 @@ export default function FileDialog(){
 
     useEffect(()=>{
         getFileList()
+        if (browserSupportsSpeechRecognition) {
+            console.log('Speech recognition supported');
+        }
     },[])
 
     return (
@@ -200,7 +205,6 @@ export default function FileDialog(){
                 <DialogTitle>输入条目</DialogTitle>
                 <DialogContent>
                     <TextField multiline sx={{width:"100%",maxHeight:"200px",overflow:"auto"}} value={text} onChange={(e)=>setText(e.target.value)}/>
-                    
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={()=>setOpenVoice(false)}>
@@ -210,7 +214,7 @@ export default function FileDialog(){
                 </DialogActions>
                 <Box sx={{display:"block",position:"absolute",bottom:"5%",left:"5%"}}>
                 <Tooltip title="语音输入" placement="top" arrow>
-                    <IconButton type="button" aria-label="search" onClick={startSpeaking}>
+                    <IconButton type="button" aria-label="search" onClick={startListening}>
                         <KeyboardVoiceIcon  color={speaking?'primary':'inherit'}/>
                     </IconButton>
                 </Tooltip>

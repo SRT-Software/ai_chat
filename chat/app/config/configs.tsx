@@ -1,1 +1,1 @@
-export const BASEURL = 'http://8.130.122.17:5000'
+export const BASEURL = process.env.NEXT_PUBLIC_BASEURL

@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append("..")
 import time
 
 from langchain.schema import Document
@@ -19,7 +22,7 @@ import os
 import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint, make_response
-from data.mysql_command import upload_data, delete_table, query_data, store_filename, get_files
+from data.mysql_command import upload_data, delete_table, query_data, store_filename, get_files, query_embedding_index, set_embedding_index
 from reportlab.pdfgen import canvas
 from flask import Flask, request, jsonify, Blueprint
 from datetime import datetime
@@ -263,6 +266,7 @@ def ingest(docs, filename, database="milvus"):
         # 把向量添加到刚才建立的表格中
         # ids可以为None，使用自动生成的id
         json_list = [json.dumps(item) for item in metadatas]
+        globals()["chunk_index"] = query_embedding_index()
         ids = [i + globals()["chunk_index"] for i in range(len(json_list))]
         try:
             entities = [
@@ -288,7 +292,7 @@ def ingest(docs, filename, database="milvus"):
             r = upload_data(filename=table_name, ids=ids)
             if r == None:
                 raise 'Name Error'
-            globals()["chunk_index"] += len(embedding_list)
+            set_embedding_index(len(embedding_list))
 
         except Exception as e:
             print(e)
@@ -326,13 +330,13 @@ def get_uploaded_files():
 
 if __name__ == '__main__':
     # connections.connect("default", host="localhost", port="19530")
-    files = get_files_in_directory('docs')
+    # files = get_files_in_directory('docs')
     print('start')
-    index = 0
-    globals()["chunk_index"] = 0
-    for file in files:
-        if file.endswith('.pdf'):
-            print(f"file{index}: {file}, total: {len(files)}")
-            doc = get_single_file_doc(file)
-            ingest(docs=doc, database="milvus")
-        index += 1
+    # index = 0
+    # globals()["chunk_index"] = 0
+    # for file in files:
+    #     if file.endswith('.pdf'):
+    #         print(f"file{index}: {file}, total: {len(files)}")
+    #         doc = get_single_file_doc(file)
+    #         ingest(docs=doc, database="milvus")
+    #     index += 1

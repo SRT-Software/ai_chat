@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append("..")
 import zhipuai
 from chat.query import match_query
 import json

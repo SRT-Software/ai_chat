@@ -1,10 +1,12 @@
+import sys
+
+sys.path.append("..")
 import hashlib
 import logging
 import time
 import mysql.connector
 from mysql.connector import errorcode
-
-from config.prepare import USER_NAME, PASSWORD, DATABASE_NAME
+from config.prepare import DATABASE_NAME, USER_NAME, PASSWORD
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -298,10 +300,10 @@ def set_embedding_index(num):
     result = cursor.fetchone()
     if not result:
         TABLES = {}
-        TABLES[DEFAULT_NAME] = (
-            f"CREATE TABLE `{DEFAULT_NAME}` ("
+        TABLES[DEFAULT_INDEX_TABLE] = (
+            f"CREATE TABLE `{DEFAULT_INDEX_TABLE}` ("
             "  `emp_no` int(11) NOT NULL,"
-            "  `index` int(11) NOT NULL,"
+            "  `idx` int(11) NOT NULL,"
             "  PRIMARY KEY (`emp_no`)"
             ") ENGINE=InnoDB")
 
@@ -319,18 +321,18 @@ def set_embedding_index(num):
                 print("OK")
 
     # 查询emp_no为0的行
-    query = "SELECT * FROM your_table WHERE emp_no = 0"
+    query = f"SELECT * FROM `{DEFAULT_INDEX_TABLE}` WHERE emp_no = 0"
     cursor.execute(query)
 
     # 检查查询结果
     row = cursor.fetchone()  # 获取一行结果
     if row is None:
         # 如果不存在emp_no为0的行，则插入新行
-        insert_query = f"INSERT INTO `{DEFAULT_INDEX_TABLE}` (emp_no, value) VALUES (0, {num})"
+        insert_query = f"INSERT INTO `{DEFAULT_INDEX_TABLE}` (emp_no, idx) VALUES (0, {num})"
         cursor.execute(insert_query)
     else:
         # 如果存在emp_no为0的行，则更新value值加10
-        update_query = f"UPDATE `{DEFAULT_INDEX_TABLE}` SET value = value + {num} WHERE emp_no = 0"
+        update_query = f"UPDATE `{DEFAULT_INDEX_TABLE}` SET idx = idx + {num} WHERE emp_no = 0"
         cursor.execute(update_query)
     # Make sure data is committed to the database
     cnx.commit()
@@ -348,10 +350,10 @@ def query_embedding_index():
     result = cursor.fetchone()
     if not result:
         TABLES = {}
-        TABLES[DEFAULT_NAME] = (
-            f"CREATE TABLE `{DEFAULT_NAME}` ("
+        TABLES[DEFAULT_INDEX_TABLE] = (
+            f"CREATE TABLE `{DEFAULT_INDEX_TABLE}` ("
             "  `emp_no` int(11) NOT NULL,"
-            "  `index` int(11) NOT NULL,"
+            "  `idx` int(11) NOT NULL,"
             "  PRIMARY KEY (`emp_no`)"
             ") ENGINE=InnoDB")
 
@@ -369,7 +371,7 @@ def query_embedding_index():
                 print("OK")
 
     # 查询emp_no为0的行，并返回index的值
-    query = f"SELECT index FROM {DEFAULT_INDEX_TABLE} WHERE emp_no = 0"
+    query = f"SELECT idx FROM {DEFAULT_INDEX_TABLE} WHERE emp_no = 0"
     cursor.execute(query)
 
     # 获取查询结果
@@ -377,7 +379,7 @@ def query_embedding_index():
     result = cursor.fetchone()  # 获取一行结果
     if result is not None:
         index_value = result[0]
-        print("The index value for emp_no=0 is:", index_value)
+        print("The idx value for emp_no=0 is:", index_value)
     else:
         print("No rows found for emp_no=0")
 

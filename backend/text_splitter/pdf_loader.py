@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append("..")
 from typing import List
 from langchain.document_loaders.unstructured import UnstructuredFileLoader
 import tqdm  # 进度条

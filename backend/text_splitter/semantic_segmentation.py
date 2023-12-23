@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append("..")
 from abc import ABC
 
 from langchain.text_splitter import CharacterTextSplitter

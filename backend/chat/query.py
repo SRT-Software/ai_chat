@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append("..")
 import zhipuai
 from data.ingest_data import initPinecone, initMilvus
 from config.prepare import PINECONE_INDEX_NAME, CHATGLM_KEY

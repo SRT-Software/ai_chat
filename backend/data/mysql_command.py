@@ -4,6 +4,8 @@ import time
 import mysql.connector
 from mysql.connector import errorcode
 
+from config.prepare import USER_NAME, PASSWORD, DATABASE_NAME
+
 # Set up logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,16 +21,16 @@ file_handler = logging.FileHandler("cpy-errors.log")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
-DB_NAME = 'embedding'
-USER_NAME = 'user'
+DB_NAME = DATABASE_NAME
 
 config = {
     "host": "localhost",
-    "user": "new_user",
-    "password": "password",
+    "user": USER_NAME,
+    "password": PASSWORD,
 }
 
 DEFAULT_NAME = 'DEFAULT_FILES'
+DEFAULT_INDEX_TABLE = 'DEFAULT_INDEX_TABLE'
 
 
 def connect_to_mysql(config, attempts=3, delay=2):
@@ -286,9 +288,110 @@ def get_files():
     else:
         return []
 
+def set_embedding_index(num):
+    cnx = connect_to_mysql(config)
+    cursor = cnx.cursor()
+    # 查询表是否存在的 SQL 语句
+    show_tables_query = "SHOW TABLES LIKE %s"
+    cursor.execute(show_tables_query, (DEFAULT_INDEX_TABLE,))
+    # 获取查询结果
+    result = cursor.fetchone()
+    if not result:
+        TABLES = {}
+        TABLES[DEFAULT_NAME] = (
+            f"CREATE TABLE `{DEFAULT_NAME}` ("
+            "  `emp_no` int(11) NOT NULL,"
+            "  `index` int(11) NOT NULL,"
+            "  PRIMARY KEY (`emp_no`)"
+            ") ENGINE=InnoDB")
+
+        for table_name in TABLES:
+            table_description = TABLES[table_name]
+            try:
+                print("Creating table {}: ".format(table_name), end='')
+                cursor.execute(table_description)
+            except mysql.connector.Error as err:
+                if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+                    print("already exists.")
+                else:
+                    print(err.msg)
+            else:
+                print("OK")
+
+    # 查询emp_no为0的行
+    query = "SELECT * FROM your_table WHERE emp_no = 0"
+    cursor.execute(query)
+
+    # 检查查询结果
+    row = cursor.fetchone()  # 获取一行结果
+    if row is None:
+        # 如果不存在emp_no为0的行，则插入新行
+        insert_query = f"INSERT INTO `{DEFAULT_INDEX_TABLE}` (emp_no, value) VALUES (0, {num})"
+        cursor.execute(insert_query)
+    else:
+        # 如果存在emp_no为0的行，则更新value值加10
+        update_query = f"UPDATE `{DEFAULT_INDEX_TABLE}` SET value = value + {num} WHERE emp_no = 0"
+        cursor.execute(update_query)
+    # Make sure data is committed to the database
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
+def query_embedding_index():
+    cnx = connect_to_mysql(config)
+    cursor = cnx.cursor()
+    # 查询表是否存在的 SQL 语句
+    show_tables_query = "SHOW TABLES LIKE %s"
+    cursor.execute(show_tables_query, (DEFAULT_INDEX_TABLE,))
+    # 获取查询结果
+    result = cursor.fetchone()
+    if not result:
+        TABLES = {}
+        TABLES[DEFAULT_NAME] = (
+            f"CREATE TABLE `{DEFAULT_NAME}` ("
+            "  `emp_no` int(11) NOT NULL,"
+            "  `index` int(11) NOT NULL,"
+            "  PRIMARY KEY (`emp_no`)"
+            ") ENGINE=InnoDB")
+
+        for table_name in TABLES:
+            table_description = TABLES[table_name]
+            try:
+                print("Creating table {}: ".format(table_name), end='')
+                cursor.execute(table_description)
+            except mysql.connector.Error as err:
+                if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+                    print("already exists.")
+                else:
+                    print(err.msg)
+            else:
+                print("OK")
+
+    # 查询emp_no为0的行，并返回index的值
+    query = f"SELECT index FROM {DEFAULT_INDEX_TABLE} WHERE emp_no = 0"
+    cursor.execute(query)
+
+    # 获取查询结果
+    index_value = 0
+    result = cursor.fetchone()  # 获取一行结果
+    if result is not None:
+        index_value = result[0]
+        print("The index value for emp_no=0 is:", index_value)
+    else:
+        print("No rows found for emp_no=0")
+
+    # 关闭游标和数据库连接
+    cursor.close()
+    cnx.close()
+    return index_value
 
 if __name__ == '__main__':
+    print(DATABASE_NAME)
     delete_table('test')
     upload_data('test', ["111", '222', '333'])
     print(query_data('test'))
     delete_table('test')
+    print(query_embedding_index())
+    set_embedding_index(20)
+    print(query_embedding_index())

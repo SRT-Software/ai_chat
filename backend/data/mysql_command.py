@@ -6,7 +6,7 @@ import logging
 import time
 import mysql.connector
 from mysql.connector import errorcode
-from config.prepare import DATABASE_NAME, USER_NAME, PASSWORD
+from config.prepare import DATABASE_NAME, PASSWORD
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ DB_NAME = DATABASE_NAME
 
 config = {
     "host": "localhost",
-    "user": USER_NAME,
+    "user": 'root',
     "password": PASSWORD,
 }
 

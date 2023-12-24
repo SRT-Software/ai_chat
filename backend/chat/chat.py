@@ -25,7 +25,7 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
 main = Blueprint('main', __name__)
 
 
-@main.route('/api/v1/api/data', methods=['POST', 'OPTIONS'])
+@main.route('/api/data', methods=['POST', 'OPTIONS'])
 def chatbot():
     zhipuai.api_key = CHATGLM_KEY
     if request.method == 'OPTIONS':
@@ -59,7 +59,7 @@ def chatbot():
             return Response(generate(), mimetype='text/event-stream')
 
 
-@main.route('/api/v1/api/source', methods=['GET'])
+@main.route('/api/source', methods=['GET'])
 def get_sources():
     response = {
         'texts': globals()['text_list'],

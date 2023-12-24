@@ -1,7 +1,5 @@
 import sys
-
 sys.path.append("..")
-import time
 
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -97,7 +95,7 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
     return docs
 
 
-@file.route('/api/v1/file/upload', methods=['POST'])
+@file.route('/file/upload', methods=['POST'])
 def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
@@ -141,7 +139,7 @@ def upload_file():
     return jsonify(response)
 
 
-@file.route('/api/v1/file/audio', methods=['POST'])
+@file.route('/file/audio', methods=['POST'])
 def upload_audio():
     def saveFile(audiotext, audiofilepath):
         ingest(docs=create_audio_docs(audiotext, audiofilepath), filename=audiofilepath, database="milvus")
@@ -306,7 +304,7 @@ def make_expr(filename):
     print(ids)
     return f'id in {ids}'
 
-@file.route('/api/v1/file/delete', methods=['POST'])
+@file.route('/file/delete', methods=['POST'])
 def deleteFile():
     if request.method == 'POST':
         data = request.json
@@ -317,7 +315,7 @@ def deleteFile():
         delete_table(filename=filename[0])
         return make_response("delete complete")
 
-@file.route('/api/v1/file/getfiles', methods=['GET'])
+@file.route('/file/getfiles', methods=['GET'])
 def get_uploaded_files():
     if request.method == 'GET':
         files = get_files()

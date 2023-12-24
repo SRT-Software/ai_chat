@@ -1,11 +1,10 @@
 import sys
-
 sys.path.append("..")
 import os
 from dotenv import load_dotenv
 
 # 指定.env文件的路径
-dotenv_path = '../.env'
+dotenv_path = '.env'
 load_dotenv(dotenv_path)
 
 # 加载环境变量
@@ -15,7 +14,6 @@ PINECONE_ENVIRONMENT = os.getenv('PINECONE_ENVIRONMENT')
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 CHATGLM_KEY = os.getenv('CHATGLM_KEY')
-USER_NAME=os.getenv('USER_NAME')
 PASSWORD=os.getenv('MYSQL_ROOT_PASSWORD')
 DATABASE_NAME=os.getenv('MYSQL_DATABASE')
 
@@ -25,5 +23,4 @@ if __name__ == '__main__':
     print(PINECONE_API_KEY)
     print(PINECONE_INDEX_NAME)
     print(CHATGLM_KEY)
-    print(USER_NAME)
     print(PASSWORD)

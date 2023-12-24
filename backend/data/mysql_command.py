@@ -1,5 +1,4 @@
 import sys
-
 sys.path.append("..")
 import hashlib
 import logging
@@ -270,6 +269,7 @@ def store_filename(filename):
 
 
 def get_files():
+    print("config: ", config)
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 

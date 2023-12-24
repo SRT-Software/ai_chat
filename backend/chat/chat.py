@@ -6,7 +6,7 @@ from chat.query import match_query
 import json
 from flask import Flask, request, jsonify, Response, abort, Blueprint
 from flask_cors import CORS
-
+from log import CustomLogger
 from config.prepare import CHATGLM_KEY
 
 text_list = []
@@ -23,7 +23,7 @@ QUES_TEMPLATE = 'make 1 relative question about {}' \
                 'you must give me the question instead of solution'
 
 main = Blueprint('main', __name__)
-
+logger = CustomLogger("logger")
 
 @main.route('/api/data', methods=['POST', 'OPTIONS'])
 def chatbot():
@@ -32,9 +32,9 @@ def chatbot():
         return "Options"
     else:
         data = request.json
-        print(data)
         ques = data.get('question')
         if ques != "":
+            logger.info(f"Data: {data}")
             globals()["text_list"], globals()["source_list"] = match_query(ques, database="milvus")
             sse_data = zhipuai.model_api.sse_invoke(
                 model="chatglm_pro",
@@ -45,7 +45,7 @@ def chatbot():
                 top_p=0.7,
                 incremental=True
             )
-
+            logger.info(f"Get Answer Back")
             def generate():
                 for event in sse_data.events():
                     yield f"{event.data}"
@@ -65,6 +65,7 @@ def get_sources():
         'texts': globals()['text_list'],
         'sources': globals()['source_list'],
     }
+    logger.info(f"Source: {globals()['source_list']}")
     return jsonify(response)
 
 

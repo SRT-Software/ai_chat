@@ -4,19 +4,19 @@ sys.path.append("..")
 import zhipuai
 from data.ingest_data import initPinecone, initMilvus
 from config.prepare import PINECONE_INDEX_NAME, CHATGLM_KEY
-
+from log import CustomLogger
 import json
 import subprocess
 
+logger = CustomLogger("query")
 
 def match_query(ques, database="pinecone"):
     zhipuai.api_key = CHATGLM_KEY
-    print('ques:', ques)
     result = zhipuai.model_api.invoke(
         model="text_embedding",
         prompt=ques
     )
-    print(result['code'], result['msg'])
+    logger.info(result['code'], result['msg'])
     embedding = result['data']['embedding']
     text_list = []
     source_list = []

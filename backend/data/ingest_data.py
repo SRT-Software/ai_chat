@@ -21,10 +21,9 @@ import json
 import subprocess
 from flask import Flask, request, jsonify, Blueprint, make_response
 from data.mysql_command import upload_data, delete_table, query_data, store_filename, get_files, query_embedding_index, set_embedding_index
-from reportlab.pdfgen import canvas
 from flask import Flask, request, jsonify, Blueprint
 from datetime import datetime
-
+from log import CustomLogger
 filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
@@ -34,7 +33,7 @@ meta_path = "meta_path"
 
 chunk_index = 0
 file = Blueprint('file', __name__)
-
+logger = CustomLogger("logger")
 
 def split_list(long_list, chunk_size):
     return [long_list[i:i + chunk_size] for i in range(0, len(long_list), chunk_size)]
@@ -100,6 +99,7 @@ def upload_file():
     def saveFile(postfile, path):
         postfile.save(path)  # 保存文件到当前工作目录
         docs = get_single_file_doc(path)
+        os.remove(path) # 删除文件
         if len(docs) == 0:
             error = make_response('file is empty')
             error.status = 400
@@ -108,7 +108,7 @@ def upload_file():
 
     if request.method == 'POST':
         # 检查请求中是否包含文件
-        print(request.files)
+        logger.info(f"file: {request.files}")
         if 'file' not in request.files:
             return 'No file part in the request'
 
@@ -295,7 +295,6 @@ def ingest(docs, filename, database="milvus"):
         except Exception as e:
             print(e)
 
-# TODO
 def make_expr(filename):
     matches = query_data(filename)
     ids = []
@@ -313,6 +312,7 @@ def deleteFile():
         collection = initMilvus()
         collection.delete(expr)
         delete_table(filename=filename[0])
+        logger.info(f"Delete File: {filename[0]}")
         return make_response("delete complete")
 
 @file.route('/file/getfiles', methods=['GET'])
@@ -323,6 +323,7 @@ def get_uploaded_files():
         response = {
             'filenames': files
         }
+        logger.info(f"Get Files {files}")
         return jsonify(response)
 
 

@@ -1,40 +1,26 @@
 import sys
 sys.path.append("..")
 import hashlib
-import logging
 import time
 import mysql.connector
 from mysql.connector import errorcode
 from config.prepare import DATABASE_NAME, PASSWORD
-
-# Set up logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-# Log to console
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# Also log to a file
-file_handler = logging.FileHandler("cpy-errors.log")
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+from log import CustomLogger
 
 DB_NAME = DATABASE_NAME
 
 config = {
-    "host": "localhost",
+    "host": "mysql",
     "user": 'root',
     "password": PASSWORD,
 }
 
 DEFAULT_NAME = 'DEFAULT_FILES'
 DEFAULT_INDEX_TABLE = 'DEFAULT_INDEX_TABLE'
-
+logger = CustomLogger("logger")
 
 def connect_to_mysql(config, attempts=3, delay=2):
+    logger.info(f"config: {config}")
     attempt = 1
     # Implement a reconnection routine
     while attempt < attempts + 1:
@@ -269,7 +255,6 @@ def store_filename(filename):
 
 
 def get_files():
-    print("config: ", config)
     cnx = connect_to_mysql(config)
     cursor = cnx.cursor()
 

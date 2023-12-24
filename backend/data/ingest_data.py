@@ -306,7 +306,7 @@ def make_expr(filename):
     print(ids)
     return f'id in {ids}'
 
-@file.route('/api/v1//file/delete', methods=['POST'])
+@file.route('/api/v1/file/delete', methods=['POST'])
 def deleteFile():
     if request.method == 'POST':
         data = request.json
@@ -317,7 +317,7 @@ def deleteFile():
         delete_table(filename=filename[0])
         return make_response("delete complete")
 
-@file.route('/api/v1//file/getfiles', methods=['GET'])
+@file.route('/api/v1/file/getfiles', methods=['GET'])
 def get_uploaded_files():
     if request.method == 'GET':
         files = get_files()

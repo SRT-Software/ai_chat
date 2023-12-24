@@ -6,7 +6,8 @@ WORKDIR /app
 
 # 复制项目的依赖项清单到容器中
 COPY requirements.txt .
-
+RUN pip config set global.index-url http://mirrors.aliyun.com/pypi/simple/
+RUN pip config set install.trusted-host mirrors.aliyun.com
 # 安装项目依赖项
 RUN pip install --no-cache-dir -r requirements.txt
 

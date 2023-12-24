@@ -20,7 +20,6 @@ DEFAULT_INDEX_TABLE = 'DEFAULT_INDEX_TABLE'
 logger = CustomLogger("logger")
 
 def connect_to_mysql(config, attempts=3, delay=2):
-    logger.info(f"config: {config}")
     attempt = 1
     # Implement a reconnection routine
     while attempt < attempts + 1:

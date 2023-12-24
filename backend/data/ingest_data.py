@@ -28,7 +28,6 @@ filePath = 'docs'
 
 milvus_collection_name = "pdf_milvus"
 
-data_path = "data.txt"
 meta_path = "meta_path"
 
 chunk_index = 0
@@ -51,7 +50,7 @@ def initMilvus():
     time = 0
     while True:
         try:
-            connections.connect("default", host="localhost", port="19530")
+            connections.connect("default", host="standalone", port="19530")
             break
         except Exception as e:
             logger.error(f"{e}")
@@ -102,9 +101,15 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
 @file.route('/file/upload', methods=['POST'])
 def upload_file():
     def saveFile(postfile, path):
+        # 检查文件夹是否存在
+        if not os.path.exists(filePath):
+            # 如果文件夹不存在，则创建
+            os.makedirs(filePath)
         postfile.save(path)  # 保存文件到当前工作目录
         docs = get_single_file_doc(path)
+        logger.info(f"len: {len(docs)}")
         os.remove(path) # 删除文件
+
         if len(docs) == 0:
             error = make_response('file is empty')
             error.status = 400
@@ -133,11 +138,10 @@ def upload_file():
                 }
                 return jsonify(response)
             except Exception as e:
-                errorResponse = {
-                    'msg': 'doc is empty',
-                    'code': 401,
-                }
-                return jsonify(errorResponse)
+                logger.error(e)
+                error = make_response(f'{e}')
+                error.status = 400
+                return error
     response = {
         'msg': 'wrong method'
     }
@@ -218,6 +222,7 @@ def ingest(docs, filename, database="milvus"):
     if isEmpty or len(docs) == 0:
         raise Exception("file is empty")
 
+    logger.info("Start Embedding")
     global chunk_index
     content_list = [chunk.page_content for chunk in docs]
     # 字符embedding后 1024维向量
@@ -233,16 +238,15 @@ def ingest(docs, filename, database="milvus"):
                 embedding_list.append(response['data']['embedding'])
                 index = int(len(embedding_list) * 100 / len(content_list))
                 progress = '[' + '=' * index + ' ' * (100 - index) + ']'
+                logger.info(f"{index}%")
                 print('\r', progress, f'{index}%', end='', flush=True)
         except Exception as e:
-            print(e)
+            logger.error(e)
             i -= 1
-    with open(data_path, 'a') as file:
-        for embedding in embedding_list:
-            file.write(f"{embedding}\n")
 
     tuple_list = []
     metadatas = []
+    logger.info("Start Make Metadatas")
     for i in range(len(embedding_list)):
         metadata = {
             'text': docs[i].page_content,
@@ -265,6 +269,7 @@ def ingest(docs, filename, database="milvus"):
         for list in short_lists:
             index.upsert(list)
     elif database == "milvus":
+        logger.info("milvus ingest")
         milvus = initMilvus()
         # 把向量添加到刚才建立的表格中
         # ids可以为None，使用自动生成的id
@@ -324,7 +329,7 @@ def deleteFile():
 def get_uploaded_files():
     if request.method == 'GET':
         files = get_files()
-        print(files)
+        logger.info(files)
         response = {
             'filenames': files
         }

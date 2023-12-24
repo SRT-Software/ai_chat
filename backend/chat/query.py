@@ -44,7 +44,6 @@ def match_query(ques, database="milvus"):
                 logger.info("Search Start")
                 results = milvus.search([vectors_to_search], "embeddings", search_params, limit=7,
                                         output_fields=["metadata"])
-                logger.info(results)
                 for result in results[0]:
                     # print('Vector ID:', result.id, ' Distance:', result.distance, 'Entity:', result.entity)
                     metadata = json.loads(result.entity.get('metadata'))

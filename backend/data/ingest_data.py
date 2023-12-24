@@ -48,15 +48,20 @@ def initPinecone():
 
 
 def initMilvus():
+    time = 0
     while True:
         try:
             connections.connect("default", host="localhost", port="19530")
             break
         except Exception as e:
-            cmd_command = 'docker-compose down'  # 替换为您要执行的实际CMD命令
-            subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
-            cmd_command = 'docker-compose up -d'  # 替换为您要执行的实际CMD命令
-            subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
+            logger.error(f"{e}")
+            time += 1
+            # cmd_command = 'docker-compose down'  # 替换为您要执行的实际CMD命令
+            # subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
+            # cmd_command = 'docker-compose up -d'  # 替换为您要执行的实际CMD命令
+            # subprocess.run(cmd_command, shell=True, capture_output=True, text=True)
+            if time >= 10:
+                break
 
     if not utility.has_collection(milvus_collection_name):
         # 向量维度
@@ -293,7 +298,7 @@ def ingest(docs, filename, database="milvus"):
             set_embedding_index(len(embedding_list))
 
         except Exception as e:
-            print(e)
+            logger.info(e)
 
 def make_expr(filename):
     matches = query_data(filename)

@@ -83,6 +83,7 @@ services:
     command: ["python3", "app.py"]
     depends_on:
       - mysql
+      - standalone
     networks:
       - web_network
       - db_network

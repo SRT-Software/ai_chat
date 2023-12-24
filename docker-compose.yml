@@ -64,9 +64,8 @@ services:
     image: mysql:latest
     container_name: mysql-db
     environment:
-      MYSQL_DATABASE: 'db_example'
-      MYSQL_ROOT_PASSWORD: 'root'
-      TZ: 'Asia/Shanghai'
+      - MYSQL_DATABASE
+      - MYSQL_ROOT_PASSWORD
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     expose:
       - "3306"

@@ -7,7 +7,6 @@ from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDE
 import pinecone
 from langchain.document_loaders import PyPDFLoader
 import zhipuai
-from text_splitter.semantic_segmentation import SemanticTextSplitter
 from pymilvus import (
     connections,
     utility,
@@ -89,11 +88,11 @@ def create_audio_docs(audiotext, audiofilepath, model="normal"):
         "source": str(datetime.now()).replace(' ', '-') + " audio",
     }
     rawDocs.append(doc)
-
-    if model == 'ali':
-        textSplitter = SemanticTextSplitter(pdf=True)
-    else:
-        textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    # if model == 'ali':
+    #     textSplitter = SemanticTextSplitter(pdf=True)
+    # else:
+    #     textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
     docs = textSplitter.split_documents(rawDocs)
     return docs
 
@@ -188,10 +187,11 @@ def get_single_file_doc(path, model="normal"):
     for d in doc:
         rawDocs.append(d)
 
-    if model == 'ali':
-        textSplitter = SemanticTextSplitter(pdf=True)
-    else:
-        textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    # if model == 'ali':
+    #     textSplitter = SemanticTextSplitter(pdf=True)
+    # else:
+    #     textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
     docs = textSplitter.split_documents(rawDocs)
     return docs
 
@@ -204,10 +204,11 @@ def getDocs(model="normal"):
         doc = pdfLoader.load()
         for d in doc:
             rawDocs.append(d)
-    if model == 'ali':
-        textSplitter = SemanticTextSplitter(pdf=True)
-    else:
-        textSplitter = RecursiveCharacterTextSplitter(chunk_size=120, chunk_overlap=80)
+    textSplitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=120)
+    # if model == 'ali':
+    #     textSplitter = SemanticTextSplitter(pdf=True)
+    # else:
+    #     textSplitter = RecursiveCharacterTextSplitter(chunk_size=120, chunk_overlap=80)
     docs = textSplitter.split_documents(rawDocs)
     return docs
 

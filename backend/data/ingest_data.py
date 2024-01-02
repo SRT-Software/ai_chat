@@ -235,7 +235,7 @@ def ingest(docs, filename, database="milvus"):
                 embedding_list.append(response['data']['embedding'])
                 index = int(len(embedding_list) * 100 / len(content_list))
                 progress = '[' + '=' * index + ' ' * (100 - index) + ']'
-                logger.info(f"{index}%")
+                # logger.info(f"{index}%")
                 print('\r', progress, f'{index}%', end='', flush=True)
         except Exception as e:
             logger.error(e)

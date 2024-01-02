@@ -1,4 +1,4 @@
-import sys
+cdimport sys
 
 sys.path.append("..")
 from abc import ABC

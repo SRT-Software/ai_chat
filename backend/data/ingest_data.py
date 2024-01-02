@@ -330,7 +330,7 @@ def get_uploaded_files():
         response = {
             'filenames': files
         }
-        logger.info(f"Get Files {files}")
+        # logger.info(f"Get Files {files}")
         return jsonify(response)
 
 

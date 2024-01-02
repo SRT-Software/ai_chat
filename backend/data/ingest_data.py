@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-
+import time
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config.prepare import PINECONE_ENVIRONMENT, PINECONE_API_KEY, PINECONE_INDEX_NAME, CHATGLM_KEY
@@ -239,6 +239,7 @@ def ingest(docs, filename, database="milvus"):
                 print('\r', progress, f'{index}%', end='', flush=True)
         except Exception as e:
             logger.error(e)
+            time.sleep(1)
             i -= 1
 
     tuple_list = []

@@ -109,8 +109,12 @@ def upload_file():
             error = make_response('file is empty')
             error.status = 400
             return error
-        ingest(docs=docs, filename=path, database="milvus")
-
+        try:
+            ingest(docs=docs, filename=path, database="milvus")
+        except e:
+            error2 = make_response(f'{e}')
+            error2.status = 400
+            return error2
     if request.method == 'POST':
         # 检查请求中是否包含文件
         logger.info(f"file: {request.files}")
@@ -224,6 +228,7 @@ def ingest(docs, filename, database="milvus"):
     content_list = [chunk.page_content for chunk in docs]
     # 字符embedding后 1024维向量
     embedding_list = []
+    times = 0
     for i in range(len(content_list)):
         content = content_list[i]
         try:
@@ -237,10 +242,14 @@ def ingest(docs, filename, database="milvus"):
                 progress = '[' + '=' * index + ' ' * (100 - index) + ']'
                 # logger.info(f"{index}%")
                 print('\r', progress, f'{index}%', end='', flush=True)
+                times = 0
         except Exception as e:
             logger.error(e)
             time.sleep(1)
             i -= 1
+            times += 1
+            if(times >= 10):
+                raise "Can't Connect with LLM"
 
     tuple_list = []
     metadatas = []

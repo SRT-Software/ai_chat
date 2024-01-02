@@ -305,7 +305,7 @@ def ingest(docs, filename, database="milvus"):
             milvus.create_index("embeddings", index)
             table_name = filename
             r = upload_data(filename=table_name, ids=ids)
-            if r == None:
+            if r is None:
                 raise 'Name Error'
             set_embedding_index(len(embedding_list))
 

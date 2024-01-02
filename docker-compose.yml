@@ -70,6 +70,7 @@ services:
       - web_network
 
   mysql:
+    restart: always
     image: mysql:latest
     container_name: mysql-db
     environment:
